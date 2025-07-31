@@ -2,7 +2,7 @@ import { LinkOutlined } from '@ant-design/icons';
 import type { Settings as LayoutSettings } from '@ant-design/pro-components';
 import { SettingDrawer } from '@ant-design/pro-components';
 import type { RequestConfig, RunTimeLayoutConfig } from '@umijs/max';
-import { history, Link } from '@umijs/max';
+import { history, Link, useModel } from '@umijs/max';
 import React from 'react';
 import { AvatarDropdown, AvatarName, Footer } from '@/components';
 import defaultSettings from '../config/defaultSettings';
@@ -17,42 +17,43 @@ const loginPath = '/user/login';
  * */
 export async function getInitialState(): Promise<{
   settings?: Partial<LayoutSettings>;
-  currentUser?: API.CurrentUser;
+  currentUser?: any;
   loading?: boolean;
 }> {
   return {
     settings: defaultSettings as Partial<LayoutSettings>,
-    currentUser: {
-      name: 'caicai',
-    },
+    ...JSON.parse(localStorage.getItem('userInfo') || '{}'),
   };
 }
 
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
-export const layout: RunTimeLayoutConfig = ({
-  initialState,
-  setInitialState,
-}) => {
+export const layout: any = ({ setInitialState }) => {
+  const initialState = {
+    ...JSON.parse(localStorage.getItem('userInfo') || '{}'),
+    settings: {
+      ...defaultSettings,
+    },
+  };
   return {
     actionsRender: () => [
       // <Question key="doc" />,
       // <SelectLang key="SelectLang" />,
     ],
     avatarProps: {
-      src: initialState?.currentUser?.avatar,
+      // src: initialState?.currentUser?.avatar,
       title: <AvatarName />,
       render: (_, avatarChildren) => {
         return <AvatarDropdown>{avatarChildren}</AvatarDropdown>;
       },
     },
     waterMarkProps: {
-      content: initialState?.currentUser?.name,
+      content: initialState?.username,
     },
     footerRender: null, // () => <Footer />,
     onPageChange: () => {
       const { location } = history;
       // 如果没有登录，重定向到 login
-      if (!initialState?.currentUser && location.pathname !== loginPath) {
+      if (!initialState?.username && location.pathname !== loginPath) {
         history.push(loginPath);
       }
     },
@@ -119,6 +120,6 @@ export const layout: RunTimeLayoutConfig = ({
  * @doc https://umijs.org/docs/max/request#配置
  */
 export const request: RequestConfig = {
-  baseURL: 'https://api.thegbpc.com',
+  baseURL: 'http://api.admin-beggar.vn-tools.net',
   ...errorConfig,
 };

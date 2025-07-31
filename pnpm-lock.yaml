@@ -78,6 +78,9 @@ importers:
       '@umijs/max':
         specifier: ^4.3.24
         version: 4.4.11(@babel/core@7.4.5)(@types/node@24.1.0)(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(dva@2.5.0-beta.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(jest@30.0.5(@types/node@24.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@24.1.0)(typescript@5.8.3)))(lightningcss@1.22.1)(prettier@2.8.8)(rc-field-form@2.7.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(rollup@3.29.5)(sugarss@2.0.0)(terser@5.43.1)(type-fest@0.21.3)(typescript@5.8.3)(webpack@5.100.2)
+      country-state-city:
+        specifier: ^3.2.1
+        version: 3.2.1
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -4317,6 +4320,9 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  country-state-city@3.2.1:
+    resolution: {integrity: sha512-kxbanqMc6izjhc/EHkGPCTabSPZ2G6eG4/97akAYHJUN4stzzFEvQPZoF8oXDQ+10gM/O/yUmISCR1ZVxyb6EA==}
 
   create-ecdh@4.0.4:
     resolution: {integrity: sha512-mf+TCx8wWc9VpuxfP2ht0iSISLZnt0JgWlrOKZiNqyUZWnjIaCIVNQArMHnCZKfEYRg6IM7A+NeJoN8gf/Ws0A==}
@@ -17457,6 +17463,8 @@ snapshots:
       parse-json: 5.2.0
     optionalDependencies:
       typescript: 5.8.3
+
+  country-state-city@3.2.1: {}
 
   create-ecdh@4.0.4:
     dependencies:

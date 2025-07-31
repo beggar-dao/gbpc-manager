@@ -1,29 +1,24 @@
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import {
-  LoginForm,
-  LoginFormPage,
-  ProFormText,
-} from '@ant-design/pro-components';
-import { FormattedMessage, Helmet, history } from '@umijs/max';
-import { message } from 'antd';
-import { login } from '@/services/ant-design-pro/api';
+import { LoginFormPage, ProFormText } from '@ant-design/pro-components';
+import { FormattedMessage, Helmet, history, useModel } from '@umijs/max';
+import { useEffect } from 'react';
+import { login } from '@/services/api';
 import Settings from '../../../../config/defaultSettings';
 
 const Login: React.FC = () => {
-  const handleSubmit = async (values: API.LoginParams) => {
-    console.log(values);
-    try {
-      // 登录
-      const msg = await login({ ...values });
-      if (msg.status === 'ok') {
-        message.success('Login successful!');
-        history.push('/');
-        return;
-      }
-    } catch (error) {
-      message.error('Login failed, please try again!');
-    }
+  const { setInitialState } = useModel('@@initialState');
+  const handleSubmit = async (values: any) => {
+    // 登录
+    const res = await login({ ...values });
+    setInitialState(res.data || {});
+    localStorage.setItem('userInfo', JSON.stringify(res.data || {}));
+    history.push('/');
   };
+
+  useEffect(() => {
+    localStorage.clear();
+    setInitialState({});
+  }, []);
 
   return (
     <>
@@ -37,7 +32,7 @@ const Login: React.FC = () => {
           backgroundVideoUrl="https://gw.alipayobjects.com/v/huamei_gcee1x/afts/video/jXRBRK_VAwoAAAAAAAAAAAAAK4eUAQBr"
           title="GBPC"
           onFinish={async (values) => {
-            await handleSubmit(values as API.LoginParams);
+            await handleSubmit(values);
           }}
           submitter={{
             searchConfig: {

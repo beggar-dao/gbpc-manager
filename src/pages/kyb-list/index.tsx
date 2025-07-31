@@ -3,56 +3,210 @@ import {
   ProDescriptions,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button, Collapse, Input, Modal } from 'antd';
-import React, { useState } from 'react';
-
+import { Button, Collapse, Image, Input, Modal, message } from 'antd';
+import { Country } from 'country-state-city';
+import dayjs from 'dayjs';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  userBusinessRealName,
+  userBusinessRealNameAudit,
+  userBusinessRealNameMember,
+  userBusinessRealNameMemberAudit,
+  userBusinessRealNameMemberAuditDetail,
+} from '@/services/api';
 export default function KycList() {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [obj, setObj] = useState({});
+  const actionRef = useRef(null); // 添加这一行
+  const [remark, setRemark] = useState('');
+  const [list, setList] = useState([]);
+  const handleCancel = () => {
+    setOpen(false);
+    setObj({});
+    setRemark('');
+    actionRef.current?.reload();
+  };
   const columns = [
     {
       title: 'UID',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: 'userId',
+      key: 'userId',
     },
     {
       title: 'Email',
-      dataIndex: 'age',
-      key: 'age',
+      dataIndex: 'email',
+      key: 'email',
     },
     {
       title: 'Company Name',
-      dataIndex: 'address',
-      key: 'address',
+      dataIndex: 'companyName',
+      key: 'companyName',
     },
     {
       title: 'Submit Time',
-      dataIndex: 'address',
-      key: 'address',
+      dataIndex: 'createTime',
+      key: 'createTime',
+      render(_) {
+        if (_ === '-') {
+          return;
+        }
+        return <div>{dayjs(_).format('DD/MM/YYYY HH:mm:ss')}</div>;
+      },
     },
     {
       title: 'Review Time / Admin ID',
-      dataIndex: 'address',
-      key: 'address',
+      dataIndex: 'reviewTime',
+      key: 'reviewTime',
+      render(_) {
+        if (_ === '-') {
+          return;
+        }
+        return <div>{dayjs(_).format('DD/MM/YYYY HH:mm:ss')}</div>;
+      },
     },
 
     {
       title: 'Status',
-      key: 'option',
-      valueType: 'option',
-      render: () => [
-        <a key="link">链路</a>,
-        <a key="link2">报警</a>,
-        <a key="link3">监控</a>,
-      ],
+      key: 'status',
+      dataIndex: 'status',
+      render: (_, record) => {
+        return (
+          <div className="flex cursor-pointer items-center gap-2">
+            {_ === 0 || _ === 1 ? (
+              <Button
+                onClick={() => {
+                  setOpen(true);
+                  setObj(record);
+                }}
+                type="primary"
+              >
+                View
+              </Button>
+            ) : null}
+            {_ === 2 ? (
+              <Button
+                onClick={() => {
+                  setOpen(true);
+                  setObj(record);
+                }}
+                color="cyan"
+                variant="solid"
+              >
+                Approve
+              </Button>
+            ) : null}
+            {_ === 3 ? (
+              <Button
+                onClick={() => {
+                  setOpen(true);
+                  setObj(record);
+                }}
+                color="danger"
+                variant="solid"
+              >
+                Reject
+              </Button>
+            ) : null}
+          </div>
+        );
+      },
     },
   ];
-  const handleOk = () => {
-    setOpen(false);
+  const getuboList = () => {
+    userBusinessRealNameMember({ realnessId: obj.id }).then((res) => {
+      setList(res?.data?.list || []);
+    });
   };
 
-  const handleCancel = () => {
-    setOpen(false);
+  useEffect(() => {
+    if (obj.id) {
+      getuboList();
+    }
+  }, [obj]);
+
+  const handleUserRealNameAudit = async (status: number) => {
+    await userBusinessRealNameAudit({
+      status,
+      id: obj.id,
+      failReason: remark,
+    });
+    message.success('Successfully updated');
+    handleCancel();
   };
+  const handleUserRealNameAuditMember = async (status: number, id: string) => {
+    await userBusinessRealNameMemberAudit({
+      status,
+      id,
+    });
+    message.success('Successfully updated');
+    getuboList();
+    // handleCancel();
+  };
+
+  const Detail = ({ id }: any) => {
+    const [item, setItem] = useState<any>({});
+    useEffect(() => {
+      if (id) {
+        userBusinessRealNameMemberAuditDetail({ id }).then((res) => {
+          setItem(res.data);
+        });
+      }
+    }, [id]);
+    return (
+      <ProDescriptions column={3}>
+        <ProDescriptions.Item label="Document Type">
+          {item.certificateType === 0 ? 'Passport' : ''}
+          {item.certificateType === 1 ? "Driver's license" : ''}
+          {item.certificateType === 2 ? 'ID Card' : ''}
+        </ProDescriptions.Item>
+        <ProDescriptions.Item label="Front Side">
+          {item.firstPhotoData ? (
+            <Image
+              style={{ height: '80px' }}
+              src={`data:image/png;base64,${item.firstPhotoData}`}
+            />
+          ) : null}
+        </ProDescriptions.Item>
+        <ProDescriptions.Item label="Back Side">
+          {item.secondPhotoData ? (
+            <Image
+              style={{ height: '80px' }}
+              src={`data:image/png;base64,${item.secondPhotoData}`}
+            />
+          ) : null}
+        </ProDescriptions.Item>
+        <ProDescriptions.Item label="LiveNess Check">
+          {item.personalPhotoData ? (
+            <Image
+              style={{ height: '80px' }}
+              src={`data:image/png;base64,${item.personalPhotoData}`}
+            />
+          ) : null}
+        </ProDescriptions.Item>
+        {item.status === 0 || item.status === 1 ? (
+          <ProDescriptions.Item label="">
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={() => handleUserRealNameAuditMember(2, id)}
+                color="cyan"
+                variant="solid"
+              >
+                Approve
+              </Button>
+              <Button
+                onClick={() => handleUserRealNameAuditMember(3, id)}
+                color="danger"
+                variant="solid"
+              >
+                Reject
+              </Button>
+            </div>
+          </ProDescriptions.Item>
+        ) : null}
+      </ProDescriptions>
+    );
+  };
+
   return (
     <PageContainer
       header={{
@@ -66,28 +220,43 @@ export default function KycList() {
         width={'50%'}
         centered
         title="Corporate KYB"
-        onOk={handleOk}
         onCancel={handleCancel}
-        footer={(_, { OkBtn, CancelBtn }) => (
-          <>
-            <Button color="cyan" variant="solid">
-              Approve
-            </Button>
-            <Button color="danger" variant="solid">
-              Reject
-            </Button>
-            {/* <CancelBtn />
-            <OkBtn /> */}
-          </>
-        )}
+        footer={(_) => {
+          if (obj.status === 1) {
+            return (
+              <>
+                <Button
+                  onClick={() => handleUserRealNameAudit(2)}
+                  color="cyan"
+                  variant="solid"
+                >
+                  Approve
+                </Button>
+                <Button
+                  onClick={() => handleUserRealNameAudit(3)}
+                  color="danger"
+                  variant="solid"
+                >
+                  Reject
+                </Button>
+                {/* <CancelBtn />
+              <OkBtn /> */}
+              </>
+            );
+          }
+        }}
       >
         <div className="max-h-[60vh] overflow-y-auto">
           <ProDescriptions className="mt-4" column={2} title="">
-            <ProDescriptions.Item label="UID">中国</ProDescriptions.Item>
-            <ProDescriptions.Item label="Registration Time">
-              type
+            <ProDescriptions.Item label="UID">
+              {obj.userId}
             </ProDescriptions.Item>
-            <ProDescriptions.Item label="Email">中国</ProDescriptions.Item>
+            <ProDescriptions.Item label="Registration Time">
+              {dayjs(obj.createTime).format('DD/MM/YYYY HH:mm:ss')}
+            </ProDescriptions.Item>
+            <ProDescriptions.Item label="Email">
+              {obj.email}
+            </ProDescriptions.Item>
           </ProDescriptions>
           <ProDescriptions
             className="mt-4"
@@ -95,17 +264,19 @@ export default function KycList() {
             title="Company Information"
           >
             <ProDescriptions.Item label="Company Name">
-              中国
+              {obj.companyName}
             </ProDescriptions.Item>
             <ProDescriptions.Item label="Registration NO">
-              中国
+              {obj.registrationNumber}
             </ProDescriptions.Item>
             <ProDescriptions.Item label="Legal Address">
-              中国
+              {obj.legalAddress}
             </ProDescriptions.Item>
-            <ProDescriptions.Item label="Tax ID">中国</ProDescriptions.Item>
+            <ProDescriptions.Item label="Tax ID">
+              {obj.taxId}
+            </ProDescriptions.Item>
             <ProDescriptions.Item label="Nationality">
-              中国
+              {Country.getCountryByCode(obj.nationality || '')?.name}
             </ProDescriptions.Item>
           </ProDescriptions>
           <ProDescriptions
@@ -123,39 +294,32 @@ export default function KycList() {
                   label: 'UBO’s',
                   children: (
                     <Collapse
-                      defaultActiveKey="1"
+                      defaultActiveKey={0}
                       accordion
-                      items={[
-                        {
-                          key: '1',
-                          label: 'This is panel nest panel',
-                          children: (
-                            <ProDescriptions title="">
-                              <ProDescriptions.Item label="First Name">
-                                中国
-                              </ProDescriptions.Item>
-                              <ProDescriptions.Item label="Last Name">
-                                中国
-                              </ProDescriptions.Item>
-                              <ProDescriptions.Item label="Email">
-                                中国
-                              </ProDescriptions.Item>
-                              <ProDescriptions.Item label="Document Type">
-                                type
-                              </ProDescriptions.Item>
-                              <ProDescriptions.Item label="Front Side">
-                                中国
-                              </ProDescriptions.Item>
-                              <ProDescriptions.Item label="Back Side">
-                                中国
-                              </ProDescriptions.Item>
-                              <ProDescriptions.Item label="LiveNess Check">
-                                中国
-                              </ProDescriptions.Item>
-                            </ProDescriptions>
-                          ),
-                        },
-                      ]}
+                      items={list
+                        .filter((item: any) => item.type === 0)
+                        .map((item, index) => {
+                          return {
+                            key: index,
+                            label: `UB0-${item.firstname} ${item.lastname}`,
+                            children: (
+                              <>
+                                <ProDescriptions title="">
+                                  <ProDescriptions.Item label="First Name">
+                                    {item.firstname}
+                                  </ProDescriptions.Item>
+                                  <ProDescriptions.Item label="Last Name">
+                                    {item.lastname}
+                                  </ProDescriptions.Item>
+                                  <ProDescriptions.Item label="Email">
+                                    {item.email}
+                                  </ProDescriptions.Item>
+                                </ProDescriptions>
+                                <Detail id={item.id} />
+                              </>
+                            ),
+                          };
+                        })}
                     />
                   ),
                 },
@@ -164,39 +328,32 @@ export default function KycList() {
                   label: 'Representatives',
                   children: (
                     <Collapse
-                      defaultActiveKey="1"
+                      defaultActiveKey={0}
                       accordion
-                      items={[
-                        {
-                          key: '1',
-                          label: 'This is panel nest panel',
-                          children: (
-                            <ProDescriptions title="">
-                              <ProDescriptions.Item label="First Name">
-                                中国
-                              </ProDescriptions.Item>
-                              <ProDescriptions.Item label="Last Name">
-                                中国
-                              </ProDescriptions.Item>
-                              <ProDescriptions.Item label="Email">
-                                中国
-                              </ProDescriptions.Item>
-                              <ProDescriptions.Item label="Document Type">
-                                type
-                              </ProDescriptions.Item>
-                              <ProDescriptions.Item label="Front Side">
-                                中国
-                              </ProDescriptions.Item>
-                              <ProDescriptions.Item label="Back Side">
-                                中国
-                              </ProDescriptions.Item>
-                              <ProDescriptions.Item label="LiveNess Check">
-                                中国
-                              </ProDescriptions.Item>
-                            </ProDescriptions>
-                          ),
-                        },
-                      ]}
+                      items={list
+                        .filter((item: any) => item.type === 1)
+                        .map((item, index) => {
+                          return {
+                            key: index,
+                            label: `UB0-${item.firstname} ${item.lastname}`,
+                            children: (
+                              <>
+                                <ProDescriptions title="">
+                                  <ProDescriptions.Item label="First Name">
+                                    {item.firstname}
+                                  </ProDescriptions.Item>
+                                  <ProDescriptions.Item label="Last Name">
+                                    {item.lastname}
+                                  </ProDescriptions.Item>
+                                  <ProDescriptions.Item label="Email">
+                                    {item.email}
+                                  </ProDescriptions.Item>
+                                </ProDescriptions>
+                                <Detail id={item.id} />
+                              </>
+                            ),
+                          };
+                        })}
                     />
                   ),
                 },
@@ -205,15 +362,22 @@ export default function KycList() {
           </ProDescriptions>
           <ProDescriptions className="mt-4" column={2} title="Industry Details">
             <ProDescriptions.Item span={2} label="Industry Description">
-              这是一段很长很长超级超级长的无意义说明文本并且重复了很多没有意义的词语，就是为了让它变得很长很长超级超级长
+              {obj.industryDescription}
             </ProDescriptions.Item>
             <ProDescriptions.Item span={2} label="Planned Investment per Year">
-              这是一段很长很长超级超级长的无意义说明文本并且重复了很多没有意义的词语，就是为了让它变得很长很长超级超级长
+              {obj.plannedInvestment}
             </ProDescriptions.Item>
           </ProDescriptions>
-          <ProDescriptions className="mt-4" column={2} title="Remark">
-            <Input.TextArea placeholder="Please Write a Remark" rows={4} />
-          </ProDescriptions>
+          {obj.status === 1 ? (
+            <ProDescriptions className="mt-4" column={2} title="Remark">
+              <Input.TextArea
+                onChange={(e) => setRemark(e.target.value)}
+                value={remark}
+                placeholder="Please Write a Remark"
+                rows={4}
+              />
+            </ProDescriptions>
+          ) : null}
         </div>
       </Modal>
       <ProTable
@@ -223,6 +387,7 @@ export default function KycList() {
         // dataSource={dataSource}
         columns={columns}
         params={{}}
+        actionRef={actionRef}
         request={async (
           // 第一个参数 params 查询表单和 params 参数的结合
           // 第一个参数中一定会有 pageSize 和  current ，这两个参数是 antd 的规范
@@ -231,29 +396,17 @@ export default function KycList() {
           // 这里需要返回一个 Promise,在返回之前你可以进行数据转化
           // 如果需要转化参数可以在这里进行修改
           console.log('params', params);
-          const promise = new Promise((resolve) => {
-            resolve([]);
+          const res = await userBusinessRealName({
+            pageNumber: params.current,
+            pageSize: params.pageSize,
           });
           return {
-            data: [
-              {
-                key: '1',
-                name: '胡彦斌',
-                age: 32,
-                address: '西湖区湖底公园1号',
-              },
-              {
-                key: '2',
-                name: '胡彦祖',
-                age: 42,
-                address: '西湖区湖底公园1号',
-              },
-            ],
+            data: res?.data?.list || [],
             // success 请返回 true，
             // 不然 table 会停止解析数据，即使有数据
             success: true,
             // 不传会使用 data 的长度，如果是分页一定要传
-            total: 100,
+            total: res?.data?.totalCount || 0,
           };
         }}
       />

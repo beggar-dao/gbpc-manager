@@ -1,5 +1,5 @@
 ﻿import type { RequestOptions } from '@@/plugin-request/request';
-import type { RequestConfig } from '@umijs/max';
+import { history, type RequestConfig } from '@umijs/max';
 import { message, notification } from 'antd';
 
 // 错误处理方案： 错误类型
@@ -89,8 +89,13 @@ export const errorConfig: RequestConfig = {
   requestInterceptors: [
     (config: RequestOptions) => {
       // 拦截请求配置，进行个性化处理。
-      const url = config?.url?.concat('?token=123');
-      return { ...config, url };
+      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      config.headers = {
+        'Content-Type': 'application/json',
+        ...config.headers,
+        satoken: `${userInfo?.tokenInfo?.tokenValue}`,
+      };
+      return config;
     },
   ],
 
@@ -99,11 +104,16 @@ export const errorConfig: RequestConfig = {
     (response) => {
       // 拦截响应数据，进行个性化处理
       const { data } = response as unknown as ResponseStructure;
-
-      if (data?.success === false) {
-        message.error('error');
+      if (data.code === 'A10005') {
+        history.push('/user/login');
       }
-      return response;
+      if (data?.code !== '00000') {
+        message.destroy();
+        message.error(data.message || 'An unexpected error occurred.');
+        return Promise.reject(response);
+      }
+
+      return Promise.resolve(response);
     },
   ],
 };

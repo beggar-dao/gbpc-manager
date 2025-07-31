@@ -1,0 +1,71 @@
+import { request } from "@umijs/max";
+
+export const login = (data: any) => {
+  return request("/admin/user/auth/login", {
+    method: "post",
+    data,
+  });
+};
+
+export const userRealName = (data: any) => {
+  return request("/user/real-name", {
+    method: "get",
+    params: data,
+  });
+};
+
+export const userRealNameDetail = (data: any) => {
+  return request(`/user/real-name/get/${data.id}`, {
+    method: "get",
+    params: data,
+  });
+};
+
+export const userRealNameAudit = (data: any) => {
+  return request(`/user/real-name/audit`, {
+    method: "post",
+    data,
+  });
+};
+
+export const userBusinessRealName = (data: any) => {
+  return request("/user/business/real-name", {
+    method: "get",
+    params: data,
+  });
+};
+
+export const userBusinessRealNameDetail = (data: any) => {
+  return request(`/user/business/real-name/get/${data.id}`, {
+    method: "get",
+    params: data,
+  });
+};
+
+export const userBusinessRealNameAudit = (data: any) => {
+  return request(`/user/business/real-name/audit`, {
+    method: "post",
+    data,
+  });
+};
+
+export const userBusinessRealNameMember = (data: any) => {
+  return request(`/user/business/real-name/member`, {
+    method: "get",
+    params: data,
+  });
+};
+
+export const userBusinessRealNameMemberAudit = (data: any) => {
+  return request(`/user/business/real-name/member/audit`, {
+    method: "post",
+    data,
+  });
+};
+
+export const userBusinessRealNameMemberAuditDetail = (data: any) => {
+  return request(`/user/business/real-name/member/${data.id}`, {
+    method: "get",
+    params: data,
+  });
+};

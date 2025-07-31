@@ -3,56 +3,145 @@ import {
   ProDescriptions,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button, Input, Modal } from 'antd';
-import React, { useState } from 'react';
+import { Button, Image, Input, Modal, message } from 'antd';
+import { Country } from 'country-state-city';
+import dayjs from 'dayjs';
+import React, { useRef, useState } from 'react';
+import { userRealName, userRealNameAudit } from '@/services/api';
 
 export default function KycList() {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [obj, setObj] = useState({});
+  const actionRef = useRef(null); // 添加这一行
+  const [remark, setRemark] = useState('');
+
+  const handleCancel = () => {
+    setOpen(false);
+    setObj({});
+    setRemark('');
+    actionRef.current?.reload();
+  };
+  const status = {
+    2: {
+      name: 'Accepted',
+      color: '#6ECE82',
+      bgColor: '#6ECE8233',
+    },
+    3: {
+      name: 'Rejected',
+      color: '#FF2121',
+      bgColor: '#FF212133',
+    },
+    1: {
+      name: 'Awating for approval',
+      color: '#202B4B',
+      bgColor: '#202B4B33',
+    },
+  };
+  const handleUserRealNameAudit = async (status: number) => {
+    await userRealNameAudit({
+      status,
+      id: obj.id,
+      failReason: remark,
+    });
+    message.success('Successfully updated');
+    handleCancel();
+  };
   const columns = [
     {
       title: 'UID',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: 'userId',
+      key: 'userId',
     },
     {
       title: 'Email',
-      dataIndex: 'age',
-      key: 'age',
+      dataIndex: 'email',
+      key: 'email',
     },
     {
       title: 'Full Name',
       dataIndex: 'address',
       key: 'address',
+      render(_, record) {
+        return (
+          <div>
+            {record.firstname || ''}
+            {record.lastname || ''}
+          </div>
+        );
+      },
     },
     {
       title: 'Submit Time',
-      dataIndex: 'address',
-      key: 'address',
+      dataIndex: 'createTime',
+      key: 'createTime',
+      render(_) {
+        if (_ === '-') {
+          return;
+        }
+        return <div>{dayjs(_).format('DD/MM/YYYY HH:mm:ss')}</div>;
+      },
     },
     {
       title: 'Review Time / Admin ID',
-      dataIndex: 'address',
-      key: 'address',
+      dataIndex: 'reviewTime',
+      key: 'reviewTime',
+      render(_) {
+        if (_ === '-') {
+          return;
+        }
+        return <div>{dayjs(_).format('DD/MM/YYYY HH:mm:ss')}</div>;
+      },
     },
 
     {
       title: 'Status',
-      key: 'option',
-      valueType: 'option',
-      render: () => [
-        <a key="link">链路</a>,
-        <a key="link2">报警</a>,
-        <a key="link3">监控</a>,
-      ],
+      key: 'status',
+      dataIndex: 'status',
+      render: (_, record) => {
+        return (
+          <div className="flex cursor-pointer items-center gap-2">
+            {_ === 1 ? (
+              <Button
+                onClick={() => {
+                  setOpen(true);
+                  setObj(record);
+                }}
+                type="primary"
+              >
+                View
+              </Button>
+            ) : null}
+            {_ === 2 ? (
+              <Button
+                onClick={() => {
+                  setOpen(true);
+                  setObj(record);
+                }}
+                color="cyan"
+                variant="solid"
+              >
+                Approve
+              </Button>
+            ) : null}
+            {_ === 3 ? (
+              <Button
+                onClick={() => {
+                  setOpen(true);
+                  setObj(record);
+                }}
+                color="danger"
+                variant="solid"
+              >
+                Reject
+              </Button>
+            ) : null}
+          </div>
+        );
+      },
     },
   ];
-  const handleOk = () => {
-    setOpen(false);
-  };
 
-  const handleCancel = () => {
-    setOpen(false);
-  };
   return (
     <PageContainer
       header={{
@@ -66,54 +155,152 @@ export default function KycList() {
         width={'50%'}
         centered
         title="Individual KYC"
-        onOk={handleOk}
         onCancel={handleCancel}
-        footer={(_, { OkBtn, CancelBtn }) => (
-          <>
-            <Button color="cyan" variant="solid">
-              Approve
-            </Button>
-            <Button color="danger" variant="solid">
-              Reject
-            </Button>
-            {/* <CancelBtn />
-            <OkBtn /> */}
-          </>
-        )}
+        footer={(_, { OkBtn, CancelBtn }) => {
+          if (obj.status === 1) {
+            return (
+              <>
+                <Button
+                  onClick={() => handleUserRealNameAudit(2)}
+                  color="cyan"
+                  variant="solid"
+                >
+                  Approve
+                </Button>
+                <Button
+                  onClick={() => handleUserRealNameAudit(3)}
+                  color="danger"
+                  variant="solid"
+                >
+                  Reject
+                </Button>
+                {/* <CancelBtn />
+              <OkBtn /> */}
+              </>
+            );
+          }
+        }}
       >
         <div className="max-h-[60vh] overflow-y-auto">
+          <ProDescriptions className="mt-4" column={2} title="">
+            <ProDescriptions.Item label="UID">
+              {obj.userId}
+            </ProDescriptions.Item>
+            <ProDescriptions.Item label="Registration Time">
+              {dayjs(obj.createTime).format('DD/MM/YYYY HH:mm:ss')}
+            </ProDescriptions.Item>
+            <ProDescriptions.Item label="Email">
+              {obj.email}
+            </ProDescriptions.Item>
+          </ProDescriptions>
+          <ProDescriptions className="mt-4" column={2} title="Personal Info">
+            <ProDescriptions.Item label="First Name">
+              {obj.firstname}
+            </ProDescriptions.Item>
+            <ProDescriptions.Item label="Last Name">
+              {obj.lastname}
+            </ProDescriptions.Item>
+            <ProDescriptions.Item label="Date of Birth (DOB)">
+              {dayjs(obj.birthday).format('DD/MM/YYYY')}
+            </ProDescriptions.Item>
+            <ProDescriptions.Item label="Country of Birth">
+              {Country.getCountryByCode(obj.birthCountry || '')?.name}
+            </ProDescriptions.Item>
+            <ProDescriptions.Item label="Nationality">
+              {Country.getCountryByCode(obj.nationality || '')?.name}
+            </ProDescriptions.Item>
+          </ProDescriptions>
+
+          <ProDescriptions className="mt-4" column={2} title="Address">
+            <ProDescriptions.Item label="Street,Home Number">
+              {obj.street}
+            </ProDescriptions.Item>
+            <ProDescriptions.Item label="Apartment/Unit(Optional)">
+              未知字段
+            </ProDescriptions.Item>
+            <ProDescriptions.Item label="City">{obj.city}</ProDescriptions.Item>
+            <ProDescriptions.Item label="Postal Code">
+              {obj.postcode}
+            </ProDescriptions.Item>
+            <ProDescriptions.Item label="Country">
+              {obj.country}
+            </ProDescriptions.Item>
+            <ProDescriptions.Item label="Address Proof">
+              <Image
+                style={{ height: '80px' }}
+                src={`data:image/png;base64,${obj.addressProof}`}
+              />
+            </ProDescriptions.Item>
+          </ProDescriptions>
+
+          <ProDescriptions className="mt-4" column={2} title="Financial Info">
+            <ProDescriptions.Item label="Planned Annual Investment">
+              {obj.plannedAnnualInvestment}
+            </ProDescriptions.Item>
+            <ProDescriptions.Item label="Annual Income/Earnings">
+              {obj.annualEarnings}
+            </ProDescriptions.Item>
+            <ProDescriptions.Item label="Estimated Total Wealth">
+              {obj.estimatedTotalWealth}
+            </ProDescriptions.Item>
+            <ProDescriptions.Item label="Source of Funds">
+              {obj.sourceOfFunds}
+            </ProDescriptions.Item>
+          </ProDescriptions>
+
           <ProDescriptions className="mt-4" column={2} title="Occupation Info">
             <ProDescriptions.Item span={2} label="Occupation Description">
-              这是一段很长很长超级超级长的无意义说明文本并且重复了很多没有意义的词语，就是为了让它变得很长很长超级超级长
+              {obj.occupationDescription}
             </ProDescriptions.Item>
-            <ProDescriptions.Item span={2} label="Status">
-              这是一段很长很长超级超级长的无意义说明文本并且重复了很多没有意义的词语，就是为了让它变得很长很长超级超级长
+            <ProDescriptions.Item span={2} label="Professional Status">
+              {obj.professionalStatus}
             </ProDescriptions.Item>
           </ProDescriptions>
           <ProDescriptions className="mt-4" column={2} title="Documents">
             <ProDescriptions.Item label="Country of Issue">
-              中国
+              {Country.getCountryByCode(obj.certificateCountry || '')?.name}
             </ProDescriptions.Item>
             <ProDescriptions.Item label="Document Type">
-              type
+              {obj.certificateType === 0 ? 'Passport' : ''}
+              {obj.certificateType === 1 ? "Driver's license" : ''}
+              {obj.certificateType === 2 ? 'ID Card' : ''}
             </ProDescriptions.Item>
-            <ProDescriptions.Item label="Front Side">中国</ProDescriptions.Item>
+            <ProDescriptions.Item label="Front Side">
+              <Image
+                style={{ height: '80px' }}
+                src={`data:image/png;base64,${obj.firstPhotoData}`}
+              />
+            </ProDescriptions.Item>
             <ProDescriptions.Item label="Back Side">
-              这是一段很长很长超级超级长的无意义说明文本并且重复了很多没有意义的词语，就是为了让它变得很长很长超级超级长
+              <Image
+                style={{ height: '80px' }}
+                src={`data:image/png;base64,${obj.secondPhotoData}`}
+              />
             </ProDescriptions.Item>
             <ProDescriptions.Item label="LiveNess Check">
-              中国
+              <Image
+                style={{ height: '80px' }}
+                src={`data:image/png;base64,${obj.personalPhotoData}`}
+              />
             </ProDescriptions.Item>
           </ProDescriptions>
-          <ProDescriptions className="mt-4" column={2} title="Remark">
-            <Input.TextArea placeholder="Please Write a Remark" rows={4} />
-          </ProDescriptions>
+          {obj.status === 1 ? (
+            <ProDescriptions className="mt-4" column={2} title="Remark">
+              <Input.TextArea
+                onChange={(e) => setRemark(e.target.value)}
+                value={remark}
+                placeholder="Please Write a Remark"
+                rows={4}
+              />
+            </ProDescriptions>
+          ) : null}
         </div>
       </Modal>
       <ProTable
         rowKey="id"
         search={false}
         bordered
+        actionRef={actionRef}
         // dataSource={dataSource}
         columns={columns}
         params={{}}
@@ -125,29 +312,17 @@ export default function KycList() {
           // 这里需要返回一个 Promise,在返回之前你可以进行数据转化
           // 如果需要转化参数可以在这里进行修改
           console.log('params', params);
-          const promise = new Promise((resolve) => {
-            resolve([]);
+          const res = await userRealName({
+            pageNumber: params.current,
+            pageSize: params.pageSize,
           });
           return {
-            data: [
-              {
-                key: '1',
-                name: '胡彦斌',
-                age: 32,
-                address: '西湖区湖底公园1号',
-              },
-              {
-                key: '2',
-                name: '胡彦祖',
-                age: 42,
-                address: '西湖区湖底公园1号',
-              },
-            ],
+            data: res?.data?.list || [],
             // success 请返回 true，
             // 不然 table 会停止解析数据，即使有数据
             success: true,
             // 不传会使用 data 的长度，如果是分页一定要传
-            total: 100,
+            total: res?.data?.totalCount || 0,
           };
         }}
       />
