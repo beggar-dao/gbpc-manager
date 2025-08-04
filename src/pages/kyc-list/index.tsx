@@ -14,6 +14,7 @@ export default function KycList() {
   const [obj, setObj] = useState({});
   const actionRef = useRef(null); // 添加这一行
   const [remark, setRemark] = useState('');
+  const [imgError, setImgError] = useState(false);
 
   const handleCancel = () => {
     setOpen(false);
@@ -226,10 +227,20 @@ export default function KycList() {
               {obj.country}
             </ProDescriptions.Item>
             <ProDescriptions.Item label="Address Proof">
-              <Image
-                style={{ height: '80px' }}
-                src={`data:image/png;base64,${obj.addressProof}`}
-              />
+              {obj.addressProof && !imgError ? (
+                <Image
+                  style={{ height: '80px' }}
+                  src={`data:image/png;base64,${obj.addressProof}`}
+                  onError={() => setImgError(true)}
+                />
+              ) : (
+                <embed
+                  type="application/pdf"
+                  src={`data:application/pdf;base64,${obj.addressProof}`}
+                  width="100%"
+                  height={300}
+                />
+              )}
             </ProDescriptions.Item>
           </ProDescriptions>
 
