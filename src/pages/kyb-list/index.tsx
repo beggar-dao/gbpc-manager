@@ -183,7 +183,7 @@ export default function KycList() {
             />
           ) : null}
         </ProDescriptions.Item>
-        {item.status === 0 || item.status === 1 ? (
+        {item.status === 1 ? (
           <ProDescriptions.Item label="">
             <div className="flex items-center gap-2">
               <Button
