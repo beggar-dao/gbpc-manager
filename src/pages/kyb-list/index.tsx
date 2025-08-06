@@ -6,7 +6,7 @@ import {
 import { Button, Collapse, Image, Input, Modal, message } from 'antd';
 import { Country } from 'country-state-city';
 import dayjs from 'dayjs';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import {
   userBusinessRealName,
   userBusinessRealNameAudit,
@@ -19,7 +19,6 @@ export default function KycList() {
   const [obj, setObj] = useState({});
   const actionRef = useRef(null); // 添加这一行
   const [remark, setRemark] = useState('');
-  const [remark1, setRemark1] = useState('');
   const [list, setList] = useState([]);
   const handleCancel = () => {
     setOpen(false);
@@ -138,23 +137,27 @@ export default function KycList() {
     message.success('Successfully updated');
     handleCancel();
   };
-  const handleUserRealNameAuditMember = async (status: number, id: string) => {
-    if (status === 3 && !remark1) {
-      message.error('Please enter the reason');
-      return;
-    }
-    await userBusinessRealNameMemberAudit({
-      failReason: remark1,
-      status,
-      id,
-    });
-    message.success('Successfully updated');
-    getuboList();
-    // handleCancel();
-  };
 
   const Detail = ({ id }: any) => {
     const [item, setItem] = useState<any>({});
+    const [remark1, setRemark1] = useState('');
+    const handleUserRealNameAuditMember = async (
+      status: number,
+      id: string,
+    ) => {
+      if (status === 3 && !remark1) {
+        message.error('Please enter the reason');
+        return;
+      }
+      await userBusinessRealNameMemberAudit({
+        failReason: remark1,
+        status,
+        id,
+      });
+      message.success('Successfully updated');
+      getuboList();
+      // handleCancel();
+    };
     useEffect(() => {
       if (id) {
         userBusinessRealNameMemberAuditDetail({ id }).then((res) => {
