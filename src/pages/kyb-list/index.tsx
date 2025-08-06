@@ -19,6 +19,7 @@ export default function KycList() {
   const [obj, setObj] = useState({});
   const actionRef = useRef(null); // 添加这一行
   const [remark, setRemark] = useState('');
+  const [remark1, setRemark1] = useState('');
   const [list, setList] = useState([]);
   const handleCancel = () => {
     setOpen(false);
@@ -78,7 +79,7 @@ export default function KycList() {
                   setOpen(true);
                   setObj(record);
                 }}
-                type="primary"
+                type="link"
               >
                 View
               </Button>
@@ -90,7 +91,7 @@ export default function KycList() {
                   setObj(record);
                 }}
                 color="cyan"
-                variant="solid"
+                variant="text"
               >
                 Approve
               </Button>
@@ -102,7 +103,7 @@ export default function KycList() {
                   setObj(record);
                 }}
                 color="danger"
-                variant="solid"
+                variant="text"
               >
                 Reject
               </Button>
@@ -125,6 +126,10 @@ export default function KycList() {
   }, [obj]);
 
   const handleUserRealNameAudit = async (status: number) => {
+    if (status === 3 && !remark) {
+      message.error('Please enter the reason');
+      return;
+    }
     await userBusinessRealNameAudit({
       status,
       id: obj.id,
@@ -134,7 +139,12 @@ export default function KycList() {
     handleCancel();
   };
   const handleUserRealNameAuditMember = async (status: number, id: string) => {
+    if (status === 3 && !remark1) {
+      message.error('Please enter the reason');
+      return;
+    }
     await userBusinessRealNameMemberAudit({
+      failReason: remark1,
       status,
       id,
     });
@@ -153,57 +163,73 @@ export default function KycList() {
       }
     }, [id]);
     return (
-      <ProDescriptions column={3}>
-        <ProDescriptions.Item label="Document Type">
-          {item.certificateType === 0 ? 'Passport' : ''}
-          {item.certificateType === 1 ? "Driver's license" : ''}
-          {item.certificateType === 2 ? 'ID Card' : ''}
-        </ProDescriptions.Item>
-        <ProDescriptions.Item label="Front Side">
-          {item.firstPhotoData ? (
-            <Image
-              style={{ height: '80px' }}
-              src={`data:image/png;base64,${item.firstPhotoData}`}
-            />
-          ) : null}
-        </ProDescriptions.Item>
-        <ProDescriptions.Item label="Back Side">
-          {item.secondPhotoData ? (
-            <Image
-              style={{ height: '80px' }}
-              src={`data:image/png;base64,${item.secondPhotoData}`}
-            />
-          ) : null}
-        </ProDescriptions.Item>
-        <ProDescriptions.Item label="LiveNess Check">
-          {item.personalPhotoData ? (
-            <Image
-              style={{ height: '80px' }}
-              src={`data:image/png;base64,${item.personalPhotoData}`}
-            />
-          ) : null}
-        </ProDescriptions.Item>
-        {item.status === 1 ? (
-          <ProDescriptions.Item label="">
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={() => handleUserRealNameAuditMember(2, id)}
-                color="cyan"
-                variant="solid"
-              >
-                Approve
-              </Button>
-              <Button
-                onClick={() => handleUserRealNameAuditMember(3, id)}
-                color="danger"
-                variant="solid"
-              >
-                Reject
-              </Button>
-            </div>
+      <>
+        <ProDescriptions className="mt-4" column={3}>
+          <ProDescriptions.Item label="Document Type">
+            {item.certificateType === 0 ? 'Passport' : ''}
+            {item.certificateType === 1 ? "Driver's license" : ''}
+            {item.certificateType === 2 ? 'ID Card' : ''}
           </ProDescriptions.Item>
+          <ProDescriptions.Item label="Front Side">
+            {item.firstPhotoData ? (
+              <Image
+                style={{ height: '80px' }}
+                src={`data:image/png;base64,${item.firstPhotoData}`}
+              />
+            ) : null}
+          </ProDescriptions.Item>
+          <ProDescriptions.Item label="Back Side">
+            {item.secondPhotoData ? (
+              <Image
+                style={{ height: '80px' }}
+                src={`data:image/png;base64,${item.secondPhotoData}`}
+              />
+            ) : null}
+          </ProDescriptions.Item>
+        </ProDescriptions>
+        <ProDescriptions className="mt-4" column={3}>
+          <ProDescriptions.Item label="LiveNess Check">
+            {item.personalPhotoData ? (
+              <Image
+                style={{ height: '80px' }}
+                src={`data:image/png;base64,${item.personalPhotoData}`}
+              />
+            ) : null}
+          </ProDescriptions.Item>
+        </ProDescriptions>
+        {item.status === 1 ? (
+          <ProDescriptions className="mt-4">
+            <ProDescriptions.Item className="flex-1" label="Remark">
+              <div className="flex w-full justify-between items-end gap-10 ">
+                <Input.TextArea
+                  onChange={(e) => setRemark1(e.target.value)}
+                  value={remark1}
+                  placeholder="Please Write a Remark"
+                  rows={4}
+                  className="flex-1"
+                />
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={() => handleUserRealNameAuditMember(2, id)}
+                    color="cyan"
+                    variant="solid"
+                  >
+                    Approve
+                  </Button>
+                  <Button
+                    onClick={() => handleUserRealNameAuditMember(3, id)}
+                    color="danger"
+                    variant="solid"
+                  >
+                    Reject
+                  </Button>
+                </div>
+              </div>
+            </ProDescriptions.Item>
+          </ProDescriptions>
         ) : null}
-      </ProDescriptions>
+      </>
     );
   };
 
@@ -301,7 +327,7 @@ export default function KycList() {
                         .map((item, index) => {
                           return {
                             key: index,
-                            label: `UB0-${item.firstname} ${item.lastname}`,
+                            label: `UBO-${item.firstname} ${item.lastname}`,
                             children: (
                               <>
                                 <ProDescriptions title="">
@@ -335,7 +361,7 @@ export default function KycList() {
                         .map((item, index) => {
                           return {
                             key: index,
-                            label: `UB0-${item.firstname} ${item.lastname}`,
+                            label: `Representatives-${item.firstname} ${item.lastname}`,
                             children: (
                               <>
                                 <ProDescriptions title="">
