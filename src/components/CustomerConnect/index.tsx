@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useAccount, useSwitchChain } from "wagmi";
 
 // 创建自定义连接按钮组件
-export default function CustomConnectButton() {
+export default function CustomConnectButton({ label = "Sign in" }) {
   const { isConnected, chain } = useAccount();
   const { switchChain } = useSwitchChain();
 
@@ -18,10 +18,6 @@ export default function CustomConnectButton() {
   // }, [isConnected, chain, switchChain]);
 
   return (
-    <ConnectButton
-      showBalance={false}
-      accountStatus="address"
-      label="Sign in"
-    />
+    <ConnectButton showBalance={false} accountStatus="address" label={label} />
   );
 }

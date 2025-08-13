@@ -2,6 +2,7 @@ import { useModel } from "@umijs/max";
 import { Button, Card, Form, InputNumber } from "antd";
 import { useEffect, useState } from "react";
 import Dashboard from "../dashboard";
+import { PageContainer } from "@ant-design/pro-components";
 
 export default function Mint() {
   const [form] = Form.useForm();
@@ -27,7 +28,12 @@ export default function Mint() {
   };
 
   return (
-    <>
+    <PageContainer
+      header={{
+        title: "",
+        ghost: true,
+      }}
+    >
       <Dashboard />
       <Card className="w-full mt-6 md:w-[800px]">
         <div className="flex items-center gap-3 mb-6">
@@ -105,6 +111,6 @@ export default function Mint() {
           </Form.Item>
         </Form>
       </Card>
-    </>
+    </PageContainer>
   );
 }

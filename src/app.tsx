@@ -1,16 +1,19 @@
-import { LinkOutlined } from '@ant-design/icons';
-import type { Settings as LayoutSettings } from '@ant-design/pro-components';
-import { SettingDrawer } from '@ant-design/pro-components';
-import type { RequestConfig, RunTimeLayoutConfig } from '@umijs/max';
-import { history, Link, useModel } from '@umijs/max';
-import React from 'react';
-import { AvatarDropdown, AvatarName, Footer } from '@/components';
-import defaultSettings from '../config/defaultSettings';
-import { errorConfig } from './requestErrorConfig';
-import '@ant-design/v5-patch-for-react-19';
+import { LinkOutlined } from "@ant-design/icons";
+import type { Settings as LayoutSettings } from "@ant-design/pro-components";
+import { SettingDrawer } from "@ant-design/pro-components";
+import type { RequestConfig, RunTimeLayoutConfig } from "@umijs/max";
+import { history, Link, useLocation, useModel } from "@umijs/max";
+import React from "react";
+import { AvatarDropdown, AvatarName, Footer } from "@/components";
+import defaultSettings from "../config/defaultSettings";
+import { errorConfig } from "./requestErrorConfig";
+import "@ant-design/v5-patch-for-react-19";
+import RainbowWallet from "./components/RainbowWallet";
+import { Spin } from "antd";
+import CustomConnectButton from "./components/CustomerConnect";
 
-const isDev = process.env.NODE_ENV === 'development';
-const loginPath = '/user/login';
+const isDev = process.env.NODE_ENV === "development";
+const loginPath = "/user/login";
 
 /**
  * @see https://umijs.org/docs/api/runtime-config#getinitialstate
@@ -22,30 +25,41 @@ export async function getInitialState(): Promise<{
 }> {
   return {
     settings: defaultSettings as Partial<LayoutSettings>,
-    ...JSON.parse(localStorage.getItem('userInfo') || '{}'),
+    ...JSON.parse(localStorage.getItem("userInfo") || "{}"),
   };
+}
+
+export function rootContainer(container: React.ReactNode) {
+  return <RainbowWallet>{container}</RainbowWallet>;
 }
 
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
 export const layout: any = ({ setInitialState }) => {
   const initialState = {
-    ...JSON.parse(localStorage.getItem('userInfo') || '{}'),
+    ...JSON.parse(localStorage.getItem("userInfo") || "{}"),
     settings: {
       ...defaultSettings,
     },
   };
+  const { loading } = useModel("global");
+  const location = useLocation();
   return {
     actionsRender: () => [
       // <Question key="doc" />,
       // <SelectLang key="SelectLang" />,
+      location.pathname.startsWith("/contract") ? (
+        <CustomConnectButton label="Connect Wallet" />
+      ) : null,
     ],
-    avatarProps: {
-      // src: initialState?.currentUser?.avatar,
-      title: <AvatarName />,
-      render: (_, avatarChildren) => {
-        return <AvatarDropdown>{avatarChildren}</AvatarDropdown>;
-      },
-    },
+    avatarProps: location.pathname.startsWith("/contract")
+      ? null
+      : {
+          // src: initialState?.currentUser?.avatar,
+          title: <AvatarName />,
+          render: (_, avatarChildren) => {
+            return <AvatarDropdown>{avatarChildren}</AvatarDropdown>;
+          },
+        },
     waterMarkProps: {
       content: initialState?.username,
     },
@@ -59,22 +73,22 @@ export const layout: any = ({ setInitialState }) => {
     },
     bgLayoutImgList: [
       {
-        src: 'https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/D2LWSqNny4sAAAAAAAAAAAAAFl94AQBr',
+        src: "https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/D2LWSqNny4sAAAAAAAAAAAAAFl94AQBr",
         left: 85,
         bottom: 100,
-        height: '303px',
+        height: "303px",
       },
       {
-        src: 'https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/C2TWRpJpiC0AAAAAAAAAAAAAFl94AQBr',
+        src: "https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/C2TWRpJpiC0AAAAAAAAAAAAAFl94AQBr",
         bottom: -68,
         right: -45,
-        height: '303px',
+        height: "303px",
       },
       {
-        src: 'https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/F6vSTbj8KpYAAAAAAAAAAAAAFl94AQBr',
+        src: "https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/F6vSTbj8KpYAAAAAAAAAAAAAFl94AQBr",
         bottom: 0,
         left: 0,
-        width: '331px',
+        width: "331px",
       },
     ],
     links: isDev
@@ -93,6 +107,7 @@ export const layout: any = ({ setInitialState }) => {
       // if (initialState?.loading) return <PageLoading />;
       return (
         <>
+          <Spin spinning={loading} fullscreen />
           {children}
           {isDev && (
             <SettingDrawer
@@ -120,6 +135,6 @@ export const layout: any = ({ setInitialState }) => {
  * @doc https://umijs.org/docs/max/request#配置
  */
 export const request: RequestConfig = {
-  baseURL: 'http://api.admin-beggar.vn-tools.net',
+  baseURL: "http://api.admin-beggar.vn-tools.net",
   ...errorConfig,
 };

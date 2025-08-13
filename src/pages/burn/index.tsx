@@ -33,7 +33,12 @@ export default function Mint() {
   };
 
   return (
-    <>
+    <PageContainer
+      header={{
+        title: "",
+        ghost: true,
+      }}
+    >
       <Dashboard />
       <Card className="w-full mt-6 md:w-[800px]">
         <div className="flex items-center gap-3 mb-6">
@@ -151,6 +156,6 @@ export default function Mint() {
           </Form.Item>
         </Form>
       </Card>
-    </>
+    </PageContainer>
   );
 }

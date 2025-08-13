@@ -34,7 +34,12 @@ export default function Mint() {
   };
 
   return (
-    <>
+    <PageContainer
+      header={{
+        title: "",
+        ghost: true,
+      }}
+    >
       <Dashboard />
       <Card className="w-full mt-6 md:w-[800px]">
         <div className="flex items-center gap-3 mb-6">
@@ -116,7 +121,7 @@ export default function Mint() {
         <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
           <div
             onClick={() => {
-              history.push("/mint");
+              history.push("/contract/mint");
             }}
             className="bg-gray-50 cursor-pointer rounded-lg p-3 text-center"
           >
@@ -125,7 +130,7 @@ export default function Mint() {
           </div>
           <div
             onClick={() => {
-              history.push("/burn");
+              history.push("/contract/burn");
             }}
             className="bg-gray-50 cursor-pointer rounded-lg p-3 text-center"
           >
@@ -239,6 +244,6 @@ export default function Mint() {
           </Form.Item>
         </Form>
       </Card>
-    </>
+    </PageContainer>
   );
 }

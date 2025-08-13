@@ -1,6 +1,4 @@
-﻿import path from 'path';
-
-/**
+﻿/**
  * @name umi 的路由配置
  * @description 只支持 path,component,routes,redirect,wrappers,name,icon 的配置
  * @param path  path 只支持两种占位符配置，第一种是动态参数 :id 的形式，第二种是 * 通配符，通配符只能出现路由字符串的最后。
@@ -14,45 +12,71 @@
  */
 export default [
   {
-    path: '/user',
+    path: "/user",
     layout: false,
     routes: [
       {
-        name: 'login',
-        path: '/user/login',
-        component: './user/login',
+        name: "login",
+        path: "/user/login",
+        component: "./user/login",
       },
     ],
   },
 
   {
-    name: 'KYC/KYB',
-    icon: 'table',
-    path: '/list',
+    name: "KYC/KYB",
+    icon: "table",
+    path: "/list",
     routes: [
       {
-        path: '/list',
-        redirect: '/list/kyc',
+        path: "/list",
+        redirect: "/list/kyc",
       },
       {
-        name: 'Individual KYC',
-        path: '/list/kyc',
-        component: './kyc-list',
+        name: "Individual KYC",
+        path: "/list/kyc",
+        component: "./kyc-list",
       },
       {
-        name: 'Corporate KYB',
-        path: '/list/kyb',
-        component: './kyb-list',
+        name: "Corporate KYB",
+        path: "/list/kyb",
+        component: "./kyb-list",
       },
     ],
   },
   {
-    path: '/',
-    redirect: '/list/kyc',
+    name: "GBPC Contract",
+    icon: "cluster",
+    path: "/contract",
+    routes: [
+      {
+        path: "/contract",
+        redirect: "/contract/mint",
+      },
+      {
+        name: "Mint",
+        path: "/contract/mint",
+        component: "./mint",
+      },
+      {
+        name: "Burn",
+        path: "/contract/burn",
+        component: "./burn",
+      },
+      {
+        name: "Admin",
+        path: "/contract/admin",
+        component: "./admin",
+      },
+    ],
   },
   {
-    path: '*',
+    path: "/",
+    redirect: "/list/kyc",
+  },
+  {
+    path: "*",
     layout: false,
-    component: './404',
+    component: "./404",
   },
 ];
