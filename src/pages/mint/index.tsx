@@ -19,7 +19,7 @@ export default function Mint() {
   }, [form, values]);
   const onFinish = async (values: any) => {
     if (status === "connected") {
-      await changeNetWork(9200);
+      // await changeNetWork(9200);
       console.log("Success:", values);
       handleMint(values.amount);
       return;
@@ -56,10 +56,10 @@ export default function Mint() {
           </div>
           <div>
             <h3 className="text-xl font-semibold text-gray-900">
-              Mint USAD Tokens
+              Mint GBPC Tokens
             </h3>
             <p className="text-sm text-gray-600">
-              Create new USAD tokens and add them to circulation
+              Create new GBPC tokens and add them to circulation
             </p>
           </div>
         </div>

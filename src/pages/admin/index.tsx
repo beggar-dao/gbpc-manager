@@ -25,7 +25,7 @@ export default function Mint() {
   }, [form, values]);
   const onFinish = async (values: any) => {
     if (status === "connected") {
-      await changeNetWork(9200);
+      // await changeNetWork(9200);
       console.log("Success:", values);
       handleTransferOwnership(values.amount);
       return;
