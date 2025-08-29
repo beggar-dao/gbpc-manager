@@ -1,6 +1,6 @@
 import { LinkOutlined } from "@ant-design/icons";
 import type { Settings as LayoutSettings } from "@ant-design/pro-components";
-import { SettingDrawer } from "@ant-design/pro-components";
+import { ProConfigProvider, SettingDrawer } from "@ant-design/pro-components";
 import type { RequestConfig, RunTimeLayoutConfig } from "@umijs/max";
 import { history, Link, useLocation, useModel } from "@umijs/max";
 import React from "react";
@@ -9,9 +9,10 @@ import defaultSettings from "../config/defaultSettings";
 import { errorConfig } from "./requestErrorConfig";
 import "@ant-design/v5-patch-for-react-19";
 import RainbowWallet from "./components/RainbowWallet";
-import { Spin } from "antd";
+import { ConfigProvider, Spin } from "antd";
 import CustomConnectButton from "./components/CustomerConnect";
-
+// 导入英文语言包
+import enUS from "antd/locale/en_US";
 const isDev = process.env.NODE_ENV === "development";
 const loginPath = "/user/login";
 
@@ -30,7 +31,15 @@ export async function getInitialState(): Promise<{
 }
 
 export function rootContainer(container: React.ReactNode) {
-  return <RainbowWallet>{container}</RainbowWallet>;
+  return (
+    <ConfigProvider locale={enUS}>
+      <ProConfigProvider>
+        {" "}
+        {/* 添加这层包装 */}
+        <RainbowWallet>{container}</RainbowWallet>
+      </ProConfigProvider>
+    </ConfigProvider>
+  );
 }
 
 // ProLayout 支持的api https://procomponents.ant.design/components/layout

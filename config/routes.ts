@@ -71,6 +71,12 @@ export default [
     ],
   },
   {
+    path: "/payment",
+    name: "Payments",
+    icon: "bank",
+    component: "./payment",
+  },
+  {
     path: "/",
     redirect: "/list/kyc",
   },

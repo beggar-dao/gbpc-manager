@@ -69,3 +69,16 @@ export const userBusinessRealNameMemberAuditDetail = (data: any) => {
     params: data,
   });
 };
+
+export const bankList = (data: any) => {
+  return request(`/wallet/payment/bank`, {
+    method: "get",
+    params: data,
+  });
+};
+export const bankAudit = (data: any) => {
+  return request(`/wallet/payment/bank/audit`, {
+    method: "post",
+    data,
+  });
+};
