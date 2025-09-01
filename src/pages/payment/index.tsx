@@ -1,14 +1,14 @@
-import { PageContainer, ProTable } from "@ant-design/pro-components";
-import { Button, Form, Image, Input, message, Modal } from "antd";
-import dayjs from "dayjs";
-import React, { useEffect, useRef, useState } from "react";
-import { bankAudit, bankList } from "@/services/api";
+import { PageContainer, ProTable } from '@ant-design/pro-components';
+import { Button, Form, Image, Input, Modal, message } from 'antd';
+import dayjs from 'dayjs';
+import React, { useEffect, useRef, useState } from 'react';
+import { bankAudit, bankList } from '@/services/api';
 
 export default function KycList() {
   const [open, setOpen] = useState(false);
   const actionRef = useRef(null); // 添加这一行
   const [form] = Form.useForm();
-  const [type, setType] = useState<"approve" | "reject">("approve");
+  const [type, setType] = useState<'approve' | 'reject'>('approve');
   const [obj, setObj] = useState<any>({});
   const handleCancel = () => {
     setOpen(false);
@@ -17,160 +17,162 @@ export default function KycList() {
 
   const columns = [
     {
-      title: "Search",
-      dataIndex: "search",
-      key: "keyword",
+      title: 'Search',
+      dataIndex: 'search',
+      key: 'keyword',
       hideInTable: true,
       search: true,
       fieldProps: {
-        placeholder: "Bank Name, Account Holder Name and Account Number",
+        placeholder: 'Bank Name, Account Holder Name and Account Number',
       },
     },
     {
-      title: "UID",
-      dataIndex: "userId",
-      key: "userId",
-      fixed: "left",
+      title: 'UID',
+      dataIndex: 'userId',
+      key: 'userId',
+      fixed: 'left',
     },
     {
-      title: "Bank Account Number",
-      dataIndex: "iban",
-      key: "iban",
+      title: 'Bank Account Number',
+      dataIndex: 'iban',
+      key: 'iban',
     },
     {
-      title: "Account Holder Name",
-      dataIndex: "holderName",
-      key: "holderName",
+      title: 'Account Holder Name',
+      dataIndex: 'holderName',
+      key: 'holderName',
       search: false,
     },
     {
-      title: "Bank Name",
-      dataIndex: "bankName",
-      key: "bankName",
+      title: 'Bank Name',
+      dataIndex: 'bankName',
+      key: 'bankName',
     },
     {
-      title: "Swift Code",
-      dataIndex: "bic",
-      key: "bic",
+      title: 'Swift Code',
+      dataIndex: 'bic',
+      key: 'bic',
     },
     {
-      title: "Branch",
-      dataIndex: "bankBranch",
-      key: "bankBranch",
+      title: 'Branch',
+      dataIndex: 'bankBranch',
+      key: 'bankBranch',
     },
 
     {
-      title: "Currency",
-      dataIndex: "currency",
+      title: 'Currency',
+      dataIndex: 'currency',
       search: true,
-      key: "currency",
-      valueType: "select",
+      key: 'currency',
+      valueType: 'select',
       valueEnum: {
-        GBPC: { text: "GBPC" },
+        GBPC: { text: 'GBPC' },
       },
       fieldProps: {
-        defaultValue: "GBPC",
+        defaultValue: 'GBPC',
       },
     },
     {
-      title: "Billing Address",
-      dataIndex: "billingAddress",
-      key: "billingAddress",
+      title: 'Billing Address',
+      dataIndex: 'billingAddress',
+      key: 'billingAddress',
     },
     {
-      title: "Transaction No",
-      dataIndex: "transactionId",
-      key: "transactionId",
+      title: 'Transaction No',
+      dataIndex: 'transactionId',
+      key: 'transactionId',
     },
 
     {
-      title: "Deposit Amount",
-      dataIndex: "DepositAmount",
-      key: "DepositAmount",
+      title: 'Deposit Amount',
+      dataIndex: 'DepositAmount',
+      key: 'DepositAmount',
       render: () => {
         return <div>2</div>;
       },
     },
     {
-      title: "Deposit Time",
-      dataIndex: "transactionTime",
-      key: "transactionTime",
-      render(text: any) {
-        return text ? dayjs(text).format("YYYY-MM-DD HH:mm:ss") : "";
+      title: 'Deposit Time',
+      dataIndex: 'transactionTime',
+      key: 'transactionTime',
+      render(text: any, record) {
+        return record.transactionTime
+          ? dayjs(record.transactionTime).format('YYYY-MM-DD HH:mm:ss')
+          : '-';
       },
     },
     {
-      title: "Deposit to Acct",
-      dataIndex: "transactionToAcct",
-      key: "transactionToAcct",
+      title: 'Deposit to Acct',
+      dataIndex: 'transactionToAcct',
+      key: 'transactionToAcct',
     },
     {
-      title: "Deposit Bank Name",
-      dataIndex: "transactionToBankName",
-      key: "transactionToBankName",
+      title: 'Deposit Bank Name',
+      dataIndex: 'transactionToBankName',
+      key: 'transactionToBankName',
     },
     {
-      title: "Admin ID/Time",
-      dataIndex: "reviewedBy",
-      key: "reviewedBy",
+      title: 'Admin ID/Time',
+      dataIndex: 'reviewedBy',
+      key: 'reviewedBy',
       render(_, record: any) {
         return (
           <div>
             {record.reviewedBy}
-            {record.reviewedBy && record.reviewTime ? "/" : "-"}
+            {record.reviewedBy && record.reviewTime ? '/' : '-'}
             {record.reviewTime
-              ? dayjs(record.reviewTime).format("YYYY-MM-DD HH:mm:ss")
-              : ""}
+              ? dayjs(record.reviewTime).format('YYYY-MM-DD HH:mm:ss')
+              : ''}
           </div>
         );
       },
     },
     {
-      title: "Admin Transaction No",
-      dataIndex: "reviewTransactionId",
-      key: "reviewTransactionId",
+      title: 'Admin Transaction No',
+      dataIndex: 'reviewTransactionId',
+      key: 'reviewTransactionId',
     },
     {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
       search: true,
-      valueType: "select",
+      valueType: 'select',
       valueEnum: {
         0: {
-          text: "Unverified",
+          text: 'Unverified',
         },
         1: {
-          text: "Waiting for verification",
+          text: 'Waiting for verification',
         },
         2: {
-          text: "Verified",
+          text: 'Verified',
         },
         3: {
-          text: "Verification failed",
+          text: 'Verification failed',
         },
       },
       render: (text, record) => {
         return (
           <div>
-            {record.status === 0 ? "Unverified" : null}
-            {record.status === 1 ? "Waiting for verification" : null}
-            {record.status === 2 ? "Verified" : null}
-            {record.status === 3 ? "Verification failed" : null}
+            {record.status === 0 ? 'Unverified' : null}
+            {record.status === 1 ? 'Waiting for verification' : null}
+            {record.status === 2 ? 'Verified' : null}
+            {record.status === 3 ? 'Verification failed' : null}
           </div>
         );
       },
     },
 
     {
-      title: "Action",
-      key: "status",
-      fixed: "right",
+      title: 'Action',
+      key: 'status',
+      fixed: 'right',
       width: 200,
-      dataIndex: "status",
+      dataIndex: 'status',
       render: (_, record) => {
         if (record.status === 2) {
-          return "-";
+          return '-';
         }
         if (record.status === 3) {
           return (
@@ -180,12 +182,15 @@ export default function KycList() {
             </div>
           );
         }
+        if (record.status === 0) {
+          return '-';
+        }
         return (
           <div className="flex cursor-pointer justify-center items-center gap-2">
             <Button
               onClick={() => {
                 setOpen(true);
-                setType("approve");
+                setType('approve');
                 setObj(record);
               }}
               color="cyan"
@@ -196,7 +201,7 @@ export default function KycList() {
             <Button
               onClick={() => {
                 setOpen(true);
-                setType("reject");
+                setType('reject');
                 setObj(record);
               }}
               color="danger"
@@ -217,14 +222,14 @@ export default function KycList() {
   });
 
   const handlerComplete = async () => {
-    let values = await form.validateFields();
+    const values = await form.validateFields();
     await bankAudit({
       id: obj.id,
-      status: type === "approve" ? 2 : 3,
+      status: type === 'approve' ? 2 : 3,
       ...values,
     });
     handleCancel();
-    message.success("Operation successful");
+    message.success('Operation successful');
   };
 
   useEffect(() => {
@@ -234,7 +239,7 @@ export default function KycList() {
   return (
     <PageContainer
       header={{
-        title: "",
+        title: '',
         ghost: true,
       }}
       fixedHeader
@@ -243,22 +248,22 @@ export default function KycList() {
         open={open}
         width={488}
         centered
-        title={`Confirm ${type === "approve" ? "Approve" : "Reject"}`}
+        title={`Confirm ${type === 'approve' ? 'Approve' : 'Reject'}`}
         onCancel={handleCancel}
         footer={null}
       >
         <div className="max-h-[60vh] overflow-y-auto">
           <Form className="mt-6" layout="vertical" size="large" form={form}>
             <Form.Item
-              rules={[{ required: true, message: "" }]}
-              name={`${type === "approve" ? "transactionId" : "failReason"}`}
+              rules={[{ required: true, message: '' }]}
+              name={`${type === 'approve' ? 'transactionId' : 'failReason'}`}
               label={
-                type === "approve"
+                type === 'approve'
                   ? `Transaction/Reference Number`
                   : `Reject Reason`
               }
             >
-              {type === "approve" ? (
+              {type === 'approve' ? (
                 <Input
                   placeholder="Transaction ID provided by your bank"
                   type="text"
@@ -295,11 +300,11 @@ export default function KycList() {
         request={async (
           // 第一个参数 params 查询表单和 params 参数的结合
           // 第一个参数中一定会有 pageSize 和  current ，这两个参数是 antd 的规范
-          params: { pageSize: number; current: number }
+          params: { pageSize: number; current: number },
         ) => {
           // 这里需要返回一个 Promise,在返回之前你可以进行数据转化
           // 如果需要转化参数可以在这里进行修改
-          console.log("params", params);
+          console.log('params', params);
           const res = await bankList({
             ...params,
             pageNumber: params.current,
