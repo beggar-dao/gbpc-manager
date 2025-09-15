@@ -76,6 +76,14 @@ export const bankList = (data: any) => {
     params: data,
   });
 };
+
+export const transactionList = (data: any) => {
+  return request(`/wallet/account/transaction`, {
+    method: "get",
+    params: data,
+  });
+};
+
 export const bankAudit = (data: any) => {
   return request(`/wallet/payment/bank/audit`, {
     method: "post",

@@ -77,6 +77,22 @@ export default [
     component: "./payment",
   },
   {
+    name: "Deposits",
+    icon: "cluster",
+    path: "/deposits",
+    routes: [
+      {
+        path: "/deposits",
+        redirect: "/deposits/crypto",
+      },
+      {
+        name: "Crypto Deposits",
+        path: "/deposits/crypto",
+        component: "./deposits/crypto",
+      },
+    ],
+  },
+  {
     path: "/",
     redirect: "/list/kyc",
   },
