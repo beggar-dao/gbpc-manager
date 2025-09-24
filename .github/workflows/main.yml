@@ -25,8 +25,8 @@ jobs:
       # 3. 安装依赖并构建
       - name: Install and Build
         run: |
-          npm install
-          npm run build
+          npx pnpm install
+          npx pnpm run build
 
       # 4. 将 PEM 密钥写入文件（用于 SSH/SCP）
       - name: Create SSH Key File
