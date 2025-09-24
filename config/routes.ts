@@ -90,6 +90,21 @@ export default [
         path: "/deposits/crypto",
         component: "./deposits/crypto",
       },
+      {
+        name: "Transfers",
+        path: "/deposits/transfer",
+        component: "./deposits/transfer",
+      },
+      {
+        name: "Fiat Deposits",
+        path: "/deposits/fiat",
+        component: "./deposits/fiat",
+      },
+      {
+        name: "Fiat Withdrawals",
+        path: "/deposits/withdrawal",
+        component: "./deposits/withdrawal",
+      },
     ],
   },
   {

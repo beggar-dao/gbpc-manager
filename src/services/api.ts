@@ -90,3 +90,17 @@ export const bankAudit = (data: any) => {
     data,
   });
 };
+
+export const transferList = (data: any) => {
+  return request(`/wallet/account/transaction`, {
+    method: "get",
+    params: data,
+  });
+};
+
+export const transferAudit = (data: any) => {
+  return request(`/wallet/account/transaction/review`, {
+    method: "post",
+    data,
+  });
+};

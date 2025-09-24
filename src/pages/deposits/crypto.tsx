@@ -89,6 +89,9 @@ export default function Crypto() {
       dataIndex: "txId",
       key: "txId",
       render(text: any, record: any) {
+        if (!record.txId) {
+          return "-";
+        }
         return (
           <div className="flex items-center gap-2">
             {maskString(record.txId)}
