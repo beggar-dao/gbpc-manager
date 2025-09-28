@@ -1,16 +1,16 @@
-import { PageContainer, ProTable } from "@ant-design/pro-components";
-import { Button, Form, Image, Input, Modal, message } from "antd";
-import dayjs from "dayjs";
-import React, { useEffect, useRef, useState } from "react";
-import { bankAudit, transferAudit, transferList } from "@/services/api";
-import CopyComponent from "@/components/CopyComponent";
-import { maskString } from "@/utils";
+import { PageContainer, ProTable } from '@ant-design/pro-components';
+import { Button, Form, Image, Input, Modal, message } from 'antd';
+import dayjs from 'dayjs';
+import React, { useEffect, useRef, useState } from 'react';
+import CopyComponent from '@/components/CopyComponent';
+import { bankAudit, transferAudit, transferList } from '@/services/api';
+import { maskString } from '@/utils';
 
 export default function KycList() {
   const [open, setOpen] = useState(false);
   const actionRef = useRef(null); // 添加这一行
   const [form] = Form.useForm();
-  const [type, setType] = useState<"approve" | "reject">("approve");
+  const [type, setType] = useState<'approve' | 'reject'>('approve');
   const [obj, setObj] = useState<any>({});
   const handleCancel = () => {
     setOpen(false);
@@ -19,157 +19,148 @@ export default function KycList() {
 
   const columns = [
     {
-      title: "Search",
-      dataIndex: "search",
-      key: "keyword",
+      title: 'Search',
+      dataIndex: 'search',
+      key: 'keyword',
       hideInTable: true,
       search: true,
       fieldProps: {
-        placeholder: "Bank Name, Account Holder Name and Account Number",
+        placeholder: 'Bank Name, Account Holder Name and Account Number',
       },
     },
     {
-      title: "UID",
-      dataIndex: "userId",
-      key: "userId",
-      fixed: "left",
+      title: 'UID',
+      dataIndex: 'userId',
+      key: 'userId',
+      fixed: 'left',
     },
     {
-      title: "Withdrawal Time",
-      dataIndex: "timestamp",
-      key: "timestamp",
+      title: 'Withdrawal Time',
+      dataIndex: 'timestamp',
+      key: 'timestamp',
       render(text: any, record) {
         return record.timestamp
-          ? dayjs(record.timestamp).format("YYYY-MM-DD HH:mm:ss")
-          : "-";
+          ? dayjs(record.timestamp).format('YYYY-MM-DD HH:mm:ss')
+          : '-';
       },
     },
 
     {
-      title: "Currency",
-      dataIndex: "currency",
+      title: 'Currency',
+      dataIndex: 'currency',
       search: true,
-      key: "currency",
-      valueType: "select",
+      key: 'currency',
+      valueType: 'select',
       valueEnum: {
-        GBPC: { text: "GBPC" },
+        GBPC: { text: 'GBPC' },
       },
       fieldProps: {
-        defaultValue: "GBPC",
+        defaultValue: 'GBPC',
       },
       render(text: any, record: any) {
-        return (
-          <div>
-            {record.currency == 60 ? "ETH" : ""}
-            {record.currency == 195 ? "TRX" : ""}
-            {record.currency == 2510 ? "BSC" : ""}
-          </div>
-        );
+        return <div>{record.fiatCurrency}</div>;
       },
     },
     {
-      title: "Method",
-      dataIndex: "Method",
-      key: "Method",
+      title: 'Method',
+      dataIndex: 'Method',
+      key: 'Method',
       render() {
-        return "Bank Withdrawal";
+        return 'Bank Withdrawal';
       },
     },
     {
-      title: "Acc.Holder Name",
-      dataIndex: "holderName",
-      key: "holderName",
+      title: 'Acc.Holder Name',
+      dataIndex: 'holderName',
+      key: 'holderName',
     },
     {
-      title: "Account No.",
-      dataIndex: "bic",
-      key: "bic",
-    },
-
-    {
-      title: "Bank Name",
-      dataIndex: "bankName",
-      key: "bankName",
+      title: 'Account No.',
+      dataIndex: 'bic',
+      key: 'bic',
     },
 
     {
-      title: "Burn Amount(GBPC)",
-      dataIndex: "amount",
-      key: "amount",
-    },
-    {
-      title: "Fees",
-      dataIndex: "fee",
-      key: "fee",
+      title: 'Bank Name',
+      dataIndex: 'bankName',
+      key: 'bankName',
     },
 
     {
-      title: "Withdraw Amount",
-      dataIndex: "amount",
-      key: "DepositAmount",
-      render: () => {
-        return <div>2</div>;
-      },
+      title: 'Burn Amount(GBPC)',
+      dataIndex: 'amount',
+      key: 'amount',
+    },
+    {
+      title: 'Fees',
+      dataIndex: 'fee',
+      key: 'fee',
     },
 
     {
-      title: "Withdrawal Status",
-      dataIndex: "status",
-      key: "status",
+      title: 'Withdraw Amount',
+      dataIndex: 'fiatAmount',
+      key: 'fiatAmount',
+    },
+
+    {
+      title: 'Withdrawal Status',
+      dataIndex: 'status',
+      key: 'status',
       search: true,
-      valueType: "select",
+      valueType: 'select',
       valueEnum: {
         0: {
-          text: "Pending Review,",
+          text: 'Pending Review',
         },
         1: {
-          text: "Review Successful",
+          text: 'Review Successful',
         },
         2: {
-          text: "Review Rejected",
+          text: 'Review Rejected',
         },
         3: {
-          text: "Transaction Successful",
+          text: 'Transaction Successful',
         },
         4: {
-          text: "Transaction Failed",
+          text: 'Transaction Failed',
         },
       },
       render: (text, record) => {
         return (
           <div>
-            {record.status === 0 ? "Pending Review" : null}
-            {record.status === 1 ? "Review Successful" : null}
-            {record.status === 2 ? "Review Rejected" : null}
-            {record.status === 3 ? "Transaction Successful" : null}
-            {record.status === 4 ? "Transaction Failed" : null}
+            {record.status === 0 ? 'Pending Review' : null}
+            {record.status === 1 ? 'Review Successful' : null}
+            {record.status === 2 ? 'Review Rejected' : null}
+            {record.status === 3 ? 'Transaction Successful' : null}
+            {record.status === 4 ? 'Transaction Failed' : null}
           </div>
         );
       },
     },
     {
-      title: "Admin ID/Time",
-      dataIndex: "reviewedBy",
-      key: "reviewedBy",
+      title: 'Admin ID/Time',
+      dataIndex: 'reviewedBy',
+      key: 'reviewedBy',
       render(_, record: any) {
         return (
           <div>
             {record.reviewedBy}
-            {record.reviewedBy && record.reviewTime ? "/" : "-"}
+            {record.reviewedBy && record.reviewTime ? '/' : '-'}
             {record.reviewTime
-              ? dayjs(record.reviewTime).format("YYYY-MM-DD HH:mm:ss")
-              : ""}
+              ? dayjs(record.reviewTime).format('YYYY-MM-DD HH:mm:ss')
+              : ''}
           </div>
         );
       },
     },
     {
-      title: "Transaction No.",
-      dataIndex: "txId",
-      key: "txId",
+      title: 'Transaction No.',
+      dataIndex: 'txId',
+      key: 'txId',
       render(text: any, record: any) {
         if (!record.txId) {
-          return "-";
+          return '-';
         }
         return (
           <div className="flex items-center gap-2">
@@ -180,14 +171,14 @@ export default function KycList() {
       },
     },
     {
-      title: "Action",
-      key: "status",
-      fixed: "right",
+      title: 'Action',
+      key: 'status',
+      fixed: 'right',
       width: 200,
-      dataIndex: "status",
+      dataIndex: 'status',
       render: (_, record) => {
         if (record.status !== 0) {
-          return "-";
+          return '-';
         }
 
         if (record.status === 0) {
@@ -196,7 +187,7 @@ export default function KycList() {
               <Button
                 onClick={() => {
                   setOpen(true);
-                  setType("approve");
+                  setType('approve');
                   setObj(record);
                 }}
                 color="cyan"
@@ -207,7 +198,7 @@ export default function KycList() {
               <Button
                 onClick={() => {
                   setOpen(true);
-                  setType("reject");
+                  setType('reject');
                   setObj(record);
                 }}
                 color="danger"
@@ -232,11 +223,11 @@ export default function KycList() {
     const values = await form.validateFields();
     await transferAudit({
       id: obj.id,
-      status: type === "approve" ? 1 : 2,
+      status: type === 'approve' ? 1 : 2,
       ...values,
     });
     handleCancel();
-    message.success("Operation successful");
+    message.success('Operation successful');
   };
 
   useEffect(() => {
@@ -246,7 +237,7 @@ export default function KycList() {
   return (
     <PageContainer
       header={{
-        title: "",
+        title: '',
         ghost: true,
       }}
       fixedHeader
@@ -255,23 +246,23 @@ export default function KycList() {
         open={open}
         width={488}
         centered
-        title={`Confirm ${type === "approve" ? "Approve" : "Reject"}`}
+        title={`Confirm ${type === 'approve' ? 'Approve' : 'Reject'}`}
         onCancel={handleCancel}
         footer={null}
       >
         <div className="max-h-[60vh] overflow-y-auto">
-          {type === "approve" ? (
+          {type === 'approve' ? (
             <Form className="mt-6" layout="vertical" size="large" form={form}>
               <Form.Item
-                rules={[{ required: true, message: "" }]}
-                name={`${type === "approve" ? "tradeId" : "failReason"}`}
+                rules={[{ required: true, message: '' }]}
+                name={`${type === 'approve' ? 'tradeId' : 'failReason'}`}
                 label={
-                  type === "approve"
+                  type === 'approve'
                     ? `Transaction/Reference Number`
                     : `Reject Reason`
                 }
               >
-                {type === "approve" ? (
+                {type === 'approve' ? (
                   <Input
                     placeholder="Transaction ID provided by your bank"
                     type="text"
@@ -310,11 +301,11 @@ export default function KycList() {
         request={async (
           // 第一个参数 params 查询表单和 params 参数的结合
           // 第一个参数中一定会有 pageSize 和  current ，这两个参数是 antd 的规范
-          params: { pageSize: number; current: number }
+          params: { pageSize: number; current: number },
         ) => {
           // 这里需要返回一个 Promise,在返回之前你可以进行数据转化
           // 如果需要转化参数可以在这里进行修改
-          console.log("params", params);
+          console.log('params', params);
           const res = await transferList({
             ...params,
             pageNumber: params.current,
