@@ -47,18 +47,15 @@ export default function KycList() {
 
     {
       title: 'Currency',
-      dataIndex: 'currency',
+      dataIndex: 'fiatCurrency',
       search: true,
-      key: 'currency',
+      key: 'fiatCurrency',
       valueType: 'select',
       valueEnum: {
         GBPC: { text: 'GBPC' },
       },
       fieldProps: {
         defaultValue: 'GBPC',
-      },
-      render(text: any, record: any) {
-        return <div>{record.fiatCurrency}</div>;
       },
     },
     {
@@ -76,8 +73,8 @@ export default function KycList() {
     },
     {
       title: 'Account No.',
-      dataIndex: 'bic',
-      key: 'bic',
+      dataIndex: 'iban',
+      key: 'iban',
     },
 
     {
