@@ -2,22 +2,22 @@ import {
   useAccountModal,
   useChainModal,
   useConnectModal,
-} from "@rainbow-me/rainbowkit";
-import { useEffect, useMemo, useState } from "react";
+} from '@rainbow-me/rainbowkit';
+import { useModel } from '@umijs/max';
+import { message } from 'antd';
+import { useEffect, useMemo, useState } from 'react';
 import {
   useAccount,
   useReadContracts,
   useSwitchChain,
   useWaitForTransactionReceipt,
   useWriteContract,
-} from "wagmi";
-import abiData from "@/utils/abi";
-import { etherToWei } from "@/utils/index";
-import { useModel } from "@umijs/max";
-import { message } from "antd";
+} from 'wagmi';
+import abiData from '@/utils/abi';
+import { etherToWei } from '@/utils/index';
 
 export default function AccountModel() {
-  const { setLoading } = useModel("global");
+  const { setLoading } = useModel('global');
   const { address, status, chainId } = useAccount();
   console.log(address, status, chainId);
 
@@ -28,30 +28,30 @@ export default function AccountModel() {
           address: abiData.address,
           abi: abiData.abi,
           chainId,
-          functionName: "owner",
+          functionName: 'owner',
         },
         {
           address: abiData.address,
           abi: abiData.abi,
           chainId,
-          functionName: "totalSupply",
+          functionName: 'totalSupply',
         },
         {
           address: abiData.address,
           abi: abiData.abi,
           chainId,
-          functionName: "balanceOf",
+          functionName: 'balanceOf',
           args: [address as `0x${string}`],
         },
         {
           address: abiData.address,
           abi: abiData.abi,
           chainId,
-          functionName: "decimals",
+          functionName: 'decimals',
         },
       ],
     });
-  console.log(readContractsData);
+
   const isSelf = useMemo(() => {
     return (
       (readContractsData &&
@@ -62,7 +62,7 @@ export default function AccountModel() {
   const [hash, setHash] = useState<`0x${string}` | undefined>(undefined);
   const { writeContract } = useWriteContract();
   const [callbackFunc, setCallbackFunc] = useState(
-    () => () => console.log("callback")
+    () => () => console.log('callback'),
   );
   const { switchChain } = useSwitchChain();
   const { openConnectModal } = useConnectModal();
@@ -72,23 +72,23 @@ export default function AccountModel() {
     hash,
   });
   useEffect(() => {
-    console.log("transactionStatus", transactionStatus);
-    if (transactionStatus === "success") {
+    console.log('transactionStatus', transactionStatus);
+    if (transactionStatus === 'success') {
       callbackFunc();
-    } else if (transactionStatus === "error") {
+    } else if (transactionStatus === 'error') {
       setCallbackFunc(() => () => {});
       setHash(undefined);
       setLoading(false);
-      message.error("Transaction failed");
+      message.error('Transaction failed');
     }
   }, [transactionStatus]);
   const changeNetWork = async (chainId: number) => {
     await switchChain({ chainId });
   };
   const handleMint = (account: number) => {
-    console.log(etherToWei(account), "etherToWei(account)");
+    console.log(etherToWei(account), 'etherToWei(account)');
     if (!isSelf) {
-      message.error("No permission");
+      message.error('No permission');
       return false;
     }
     setLoading(true);
@@ -96,7 +96,7 @@ export default function AccountModel() {
       {
         address: abiData.address,
         abi: abiData.abi,
-        functionName: "mint",
+        functionName: 'mint',
         args: [
           readContractsData && readContractsData[0]?.result,
           etherToWei(account),
@@ -104,10 +104,10 @@ export default function AccountModel() {
       },
       {
         onSuccess: (data) => {
-          console.log(data, "handleMint");
+          console.log(data, 'handleMint');
           setHash(data);
           setCallbackFunc(() => () => {
-            message.success("Mint success");
+            message.success('Mint success');
             readContractsRefetch();
             setLoading(false);
             setCallbackFunc(() => () => {});
@@ -118,12 +118,12 @@ export default function AccountModel() {
           console.log(error);
           message.error(error.message);
         },
-      }
+      },
     );
   };
   const handleRedeem = (account: number) => {
     if (!isSelf) {
-      message.error("No permission");
+      message.error('No permission');
       return false;
     }
     setLoading(true);
@@ -131,14 +131,14 @@ export default function AccountModel() {
       {
         address: abiData.address,
         abi: abiData.abi,
-        functionName: "burn",
+        functionName: 'burn',
         args: [etherToWei(account)],
       },
       {
         onSuccess: (data) => {
           setHash(data);
           setCallbackFunc(() => () => {
-            message.success("Burn success");
+            message.success('Burn success');
             readContractsRefetch();
             setLoading(false);
             setCallbackFunc(() => () => {});
@@ -149,12 +149,12 @@ export default function AccountModel() {
           console.log(error);
           message.error(error.message);
         },
-      }
+      },
     );
   };
   const handleTransferOwnership = (newAddress: string) => {
     if (!isSelf) {
-      message.error("No permission");
+      message.error('No permission');
       return false;
     }
     setLoading(true);
@@ -162,14 +162,14 @@ export default function AccountModel() {
       {
         address: abiData.address,
         abi: abiData.abi,
-        functionName: "transferOwnership",
+        functionName: 'transferOwnership',
         args: [newAddress],
       },
       {
         onSuccess: (data) => {
           setHash(data);
           setCallbackFunc(() => () => {
-            message.success("Transfer ownership success");
+            message.success('Transfer ownership success');
             readContractsRefetch();
             setLoading(false);
             setCallbackFunc(() => () => {});
@@ -180,7 +180,7 @@ export default function AccountModel() {
           console.log(error);
           message.error(error.message);
         },
-      }
+      },
     );
   };
   return {
