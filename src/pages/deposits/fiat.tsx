@@ -282,7 +282,9 @@ export default function KycList() {
       <ProTable
         rowKey="id"
         bordered
-        // dataSource={dataSource}
+        search={{
+          labelWidth: 'auto',
+        }}
         scroll={{ x: 1500 }}
         actionRef={actionRef}
         columns={columns}
