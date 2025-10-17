@@ -1,5 +1,5 @@
 import { useRequest } from '@umijs/max';
-import { Button, ConfigProvider, Table } from 'antd';
+import { Button, ConfigProvider, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { type FunctionComponent, useCallback, useState } from 'react';
@@ -78,11 +78,14 @@ const UserManagementTable: FunctionComponent<Props> = ({ filterParams }) => {
       dataIndex: 'kycStatus',
       key: 'kycStatus',
       width: 150,
-      render: (_, { kycStatus }) => (
-        <span className={getKYCStatusClass(kycStatus as KYCStatus)}>
-          {kycStatus ? getKYCStatusText(kycStatus as KYCStatus) : '-'}
-        </span>
-      ),
+      render: (_, { kycStatus }) =>
+        kycStatus !== null ? (
+          <Tag color={getKYCStatusClass(kycStatus as KYCStatus)}>
+            {getKYCStatusText(kycStatus as KYCStatus)}
+          </Tag>
+        ) : (
+          '-'
+        ),
     },
     {
       title: 'Operation',
@@ -92,7 +95,7 @@ const UserManagementTable: FunctionComponent<Props> = ({ filterParams }) => {
       render: (_, record: UserResponseItem) => (
         <Button
           type="link"
-          className="!text-[#63BCFF] px-0"
+          className="tw-text-[#63BCFF] px-0"
           onClick={() => handleViewUser(record.id)}
         >
           View

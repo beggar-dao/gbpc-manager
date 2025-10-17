@@ -12,7 +12,8 @@ import {
  */
 export const KYCStatusOptions = [
   { label: 'All', value: '' },
-  { label: 'Not Started', value: KYCStatus.NotStarted },
+  { label: 'Draft', value: KYCStatus.Draft },
+  { label: 'Submitted', value: KYCStatus.Submitted },
   { label: 'Verified', value: KYCStatus.Verified },
   { label: 'Rejected', value: KYCStatus.Rejected },
 ];
@@ -31,8 +32,10 @@ export const EmailVerificationOptions = [
  */
 export function getKYCStatusText(status: KYCStatus): string {
   switch (status) {
-    case KYCStatus.NotStarted:
-      return 'Not Started';
+    case KYCStatus.Draft:
+      return 'Draft';
+    case KYCStatus.Submitted:
+      return 'Submitted';
     case KYCStatus.Verified:
       return 'Verified';
     case KYCStatus.Rejected:
@@ -48,13 +51,13 @@ export function getKYCStatusText(status: KYCStatus): string {
 export function getKYCStatusClass(status: KYCStatus): string {
   switch (status) {
     case KYCStatus.Verified:
-      return 'text-[#00C087]'; // Green
+      return '#00C087'; // Green
     case KYCStatus.Rejected:
-      return 'text-[#FF4D4F]'; // Red
-    case KYCStatus.NotStarted:
-      return 'text-[#FFA940]'; // Orange
+      return '#FF4D4F'; // Red
+    case KYCStatus.Submitted:
+      return '#FFA940'; // Orange
     default:
-      return 'text-[#202B4B]';
+      return '#202B4B';
   }
 }
 
@@ -82,10 +85,10 @@ export function getEmailVerificationClass(
 ): string {
   switch (status) {
     case EmailVerificationStatus.Verified:
-      return 'text-[#00C087]'; // Green
+      return '#00C087'; // Green
     case EmailVerificationStatus.Unverified:
-      return 'text-[#FF4D4F]'; // Red
+      return '#FF4D4F'; // Red
     default:
-      return 'text-[#202B4B]';
+      return '#202B4B';
   }
 }

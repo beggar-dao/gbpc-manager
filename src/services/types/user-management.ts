@@ -12,9 +12,10 @@ export enum EmailVerificationStatus {
 }
 
 export enum KYCStatus {
-  NotStarted = 0,
-  Verified = 1,
-  Rejected = 2,
+  Draft = 0,
+  Submitted = 1,
+  Verified = 2,
+  Rejected = 3,
 }
 
 /**
