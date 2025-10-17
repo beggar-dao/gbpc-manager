@@ -1,4 +1,4 @@
-import { useRequest } from '@umijs/max';
+import { useRequest, history } from '@umijs/max';
 import { Button, ConfigProvider, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
@@ -29,9 +29,14 @@ const UserManagementTable: FunctionComponent<Props> = ({ filterParams }) => {
     },
   );
 
+  console.log(data);
+
   const userList = (data as UserManagementResponse) || {
     list: [],
-    _meta: { currentPage: 1, perPage: pageSize, totalCount: 0, totalPages: 0 },
+    current: 1,
+    size: pageSize,
+    total: 0,
+    pages: 0,
   };
 
   const columns: ColumnsType<UserResponseItem> = [
@@ -105,10 +110,7 @@ const UserManagementTable: FunctionComponent<Props> = ({ filterParams }) => {
   ];
 
   const handleViewUser = (userId: string) => {
-    // TODO: Navigate to user profile page
-    console.log('View user:', userId);
-    // You can use history.push or navigate to user profile page
-    // Example: history.push(`/user/profile/${userId}`);
+    history.push(`/user-management/user-profile/${userId}`);
   };
 
   const handlePageChange = useCallback(
@@ -145,8 +147,8 @@ const UserManagementTable: FunctionComponent<Props> = ({ filterParams }) => {
           pagination={{
             size: 'default',
             current: pageNumber,
-            pageSize: userList._meta.perPage,
-            total: userList._meta.totalCount,
+            pageSize: userList.size,
+            total: userList.total,
             onChange: handlePageChange,
             showSizeChanger: true,
             showTotal: (total) => `Total ${total} users`,

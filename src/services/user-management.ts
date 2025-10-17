@@ -14,9 +14,7 @@ import type {
  * @param params - Query parameters for filtering and pagination
  * @returns Promise<UserManagementResponse>
  */
-export function getUserList(
-  params: UserManagementParams,
-): Promise<UserManagementResponse> {
+export function getUserList(params: UserManagementParams) {
   return request<UserManagementResponse>(
     '/user',
     {

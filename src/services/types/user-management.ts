@@ -135,7 +135,7 @@ export interface UserManagementResponse {
   optimizeJoinOfCountSql?: boolean;
   orders?: OrderItem[];
   pages?: number;
-  records?: UserResponseItem[];
+  list?: UserResponseItem[];
   searchCount?: boolean;
   size?: number;
   total?: number;
