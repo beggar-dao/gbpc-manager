@@ -22,7 +22,12 @@ export default [
       },
     ],
   },
-
+  {
+    name: 'User Management',
+    icon: 'user',
+    path: '/user-management',
+    component: './user-management',
+  },
   {
     name: 'KYC/KYB',
     icon: 'table',
