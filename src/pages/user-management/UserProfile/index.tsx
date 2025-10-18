@@ -1,13 +1,21 @@
 import { ArrowLeftOutlined } from '@ant-design/icons';
-import { useRequest, history, useParams } from '@umijs/max';
+import { history, useParams, useRequest } from '@umijs/max';
 import { Button, Spin, Tabs, Tag } from 'antd';
 import dayjs from 'dayjs';
 import { useState } from 'react';
-import { getUserProfile } from '@/services/user-profile';
-import type { UserProfile as UserProfileType } from '@/services/types/user-profile';
-import { getKYCStatusClass, getKYCStatusText } from '../UserList/utils/user-management';
-import { AccountInfoTab, LoginHistoryTab } from './components';
 import type { KYCStatus } from '@/services/types/user-management';
+import type { UserProfile as UserProfileType } from '@/services/types/user-profile';
+import { getUserProfile } from '@/services/user-profile';
+import {
+  getKYCStatusClass,
+  getKYCStatusText,
+} from '../UserList/utils/user-management';
+import {
+  AccountInfoMainTab,
+  DocumentsTab,
+  PaymentMethodsTab,
+  WalletsTab,
+} from './components';
 
 export default function UserProfile() {
   const { userId } = useParams<{ userId: string }>();
@@ -98,7 +106,9 @@ export default function UserProfile() {
               <div className="text-sm text-[#8C8C8C] mb-1">Role</div>
               <div className="text-base font-medium text-[#202B4B]">
                 {userProfile.userRole
-                  ? userProfile.userRole.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())
+                  ? userProfile.userRole
+                      .replace(/_/g, ' ')
+                      .replace(/\b\w/g, (l: string) => l.toUpperCase())
                   : 'User'}
               </div>
             </div>
@@ -109,7 +119,9 @@ export default function UserProfile() {
             </div>
 
             <div>
-              <div className="text-sm text-[#8C8C8C] mb-1">Joined Date & Time</div>
+              <div className="text-sm text-[#8C8C8C] mb-1">
+                Joined Date & Time
+              </div>
               <div className="text-base font-medium text-[#202B4B]">
                 {dayjs(userProfile.createTime).format('DD/MM/YYYY HH:mm:ss')}
               </div>
@@ -117,8 +129,11 @@ export default function UserProfile() {
 
             <div>
               <div className="text-sm text-[#8C8C8C] mb-1">KYC Status</div>
-              {userProfile.kycStatus !== null && userProfile.kycStatus !== undefined ? (
-                <Tag color={getKYCStatusClass(userProfile.kycStatus as KYCStatus)}>
+              {userProfile.kycStatus !== null &&
+              userProfile.kycStatus !== undefined ? (
+                <Tag
+                  color={getKYCStatusClass(userProfile.kycStatus as KYCStatus)}
+                >
                   {getKYCStatusText(userProfile.kycStatus as KYCStatus)}
                 </Tag>
               ) : (
@@ -133,14 +148,16 @@ export default function UserProfile() {
               </div>
               {userProfile.lastLoginTime && (
                 <div className="text-sm text-[#8C8C8C]">
-                  {dayjs(userProfile.lastLoginTime).format('MMM D, YYYY - HH:mm')}
+                  {dayjs(userProfile.lastLoginTime).format(
+                    'MMM D, YYYY - HH:mm',
+                  )}
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Tabs Section */}
+        {/* Main Tabs Section */}
         <div className="bg-white rounded-lg shadow-sm">
           <Tabs
             activeKey={activeTab}
@@ -150,12 +167,27 @@ export default function UserProfile() {
               {
                 key: 'account-info',
                 label: 'Account Info',
-                children: <AccountInfoTab userProfile={userProfile} />,
+                children: (
+                  <AccountInfoMainTab
+                    userProfile={userProfile}
+                    userId={userId!}
+                  />
+                ),
               },
               {
-                key: 'login-history',
-                label: 'Login History',
-                children: <LoginHistoryTab userId={userId!} />,
+                key: 'documents',
+                label: 'Documents',
+                children: <DocumentsTab userId={userId!} />,
+              },
+              {
+                key: 'payment-methods',
+                label: 'Payment Methods',
+                children: <PaymentMethodsTab userId={userId!} />,
+              },
+              {
+                key: 'wallets',
+                label: 'Wallets',
+                children: <WalletsTab userId={userId!} />,
               },
             ]}
           />
