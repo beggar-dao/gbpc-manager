@@ -166,7 +166,7 @@ export default function AccountInfoTab({ userProfile }: Props) {
   };
 
   return (
-    <div className="py-6">
+    <div>
       {/* Account Info Section */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
@@ -354,8 +354,8 @@ export default function AccountInfoTab({ userProfile }: Props) {
               <div className="text-base text-[#8C8C8C] py-1">
                 {userProfile.lastPasswordUpdate
                   ? dayjs(userProfile.lastPasswordUpdate).format(
-                      'DD/MM/YYYY HH:mm:ss',
-                    )
+                    'DD/MM/YYYY HH:mm:ss',
+                  )
                   : 'Never updated'}
               </div>
             </Form.Item>

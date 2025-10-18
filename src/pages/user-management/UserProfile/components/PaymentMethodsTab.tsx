@@ -60,7 +60,7 @@ export default function PaymentMethodsTab({ userId }: Props) {
   ];
 
   return (
-    <div className="py-6">
+    <>
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-[#202B4B]">
           Payment Methods
@@ -97,6 +97,6 @@ export default function PaymentMethodsTab({ userId }: Props) {
           }}
         />
       </ConfigProvider>
-    </div>
+    </>
   );
 }

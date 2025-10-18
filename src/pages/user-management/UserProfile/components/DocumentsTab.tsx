@@ -1,34 +1,10 @@
 import { Segmented } from 'antd';
 import { useState } from 'react';
+import IndividualDocuments from './IndividualDocuments';
+import CorporateDocuments from './CorporateDocuments';
 
 interface Props {
   userId: string;
-}
-
-// Individual KYC Documents Component
-function IndividualDocuments({ userId }: Props) {
-  return (
-    <div>
-      <h3 className="text-lg font-semibold text-[#202B4B] mb-4">
-        Individual KYC Documents
-      </h3>
-      <p className="text-[#8C8C8C]">User ID: {userId}</p>
-      {/* TODO: Implement Individual KYC documents table/list */}
-    </div>
-  );
-}
-
-// Corporate KYB Documents Component
-function CorporateDocuments({ userId }: Props) {
-  return (
-    <div>
-      <h3 className="text-lg font-semibold text-[#202B4B] mb-4">
-        Corporate KYB Documents
-      </h3>
-      <p className="text-[#8C8C8C]">User ID: {userId}</p>
-      {/* TODO: Implement Corporate KYB documents table/list */}
-    </div>
-  );
 }
 
 // Main Documents Tab Component

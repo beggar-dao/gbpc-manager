@@ -235,7 +235,7 @@ export default function LoginHistoryTab({ userId }: Props) {
   ];
 
   return (
-    <div className="py-6">
+    <div>
       {/* Filter Section */}
       <div className="mb-6 bg-[#F5F7FA] p-4 rounded-lg">
         <Form form={form} layout="vertical">

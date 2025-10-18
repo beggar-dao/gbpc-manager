@@ -3,11 +3,8 @@
 import { join } from "node:path";
 import { defineConfig } from "@umijs/max";
 import defaultSettings from "./defaultSettings";
-import proxy from "./proxy";
 
 import routes from "./routes";
-
-const { REACT_APP_ENV = "dev" } = process.env;
 
 /**
  * @name 使用公共路径
@@ -16,7 +13,7 @@ const { REACT_APP_ENV = "dev" } = process.env;
  */
 const PUBLIC_PATH: string = "/";
 
-export default defineConfig({
+const config: ReturnType<typeof defineConfig> = defineConfig({
   alias: {
     "@base-org/account": "@/utils/compatible-account",
   },
@@ -184,3 +181,5 @@ export default defineConfig({
   exportStatic: {},
   tailwindcss: {},
 });
+
+export default config;
