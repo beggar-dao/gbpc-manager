@@ -1,4 +1,5 @@
 import { ArrowLeftOutlined } from '@ant-design/icons';
+import { PageContainer } from '@ant-design/pro-components';
 import { history, useParams, useRequest } from '@umijs/max';
 import { Button, Spin, Tabs, Tag } from 'antd';
 import dayjs from 'dayjs';
@@ -12,11 +13,11 @@ import {
 } from '../UserList/utils/user-management';
 import {
   AccountInfoMainTab,
+  DepositsTab,
   DocumentsTab,
   PaymentMethodsTab,
   WalletsTab,
 } from './components';
-import { PageContainer } from '@ant-design/pro-components';
 
 export default function UserProfile() {
   const { userId } = useParams<{ userId: string }>();
@@ -107,8 +108,8 @@ export default function UserProfile() {
             <div className="text-base font-medium text-[#202B4B]">
               {userProfile.userRole
                 ? userProfile.userRole
-                  .replace(/_/g, ' ')
-                  .replace(/\b\w/g, (l: string) => l.toUpperCase())
+                    .replace(/_/g, ' ')
+                    .replace(/\b\w/g, (l: string) => l.toUpperCase())
                 : 'User'}
             </div>
           </div>
@@ -130,7 +131,7 @@ export default function UserProfile() {
           <div>
             <div className="text-sm text-[#8C8C8C] mb-1">KYC Status</div>
             {userProfile.kycStatus !== null &&
-              userProfile.kycStatus !== undefined ? (
+            userProfile.kycStatus !== undefined ? (
               <Tag
                 color={getKYCStatusClass(userProfile.kycStatus as KYCStatus)}
               >
@@ -148,9 +149,7 @@ export default function UserProfile() {
             </div>
             {userProfile.lastLoginTime && (
               <div className="text-sm text-[#8C8C8C]">
-                {dayjs(userProfile.lastLoginTime).format(
-                  'MMM D, YYYY - HH:mm',
-                )}
+                {dayjs(userProfile.lastLoginTime).format('MMM D, YYYY - HH:mm')}
               </div>
             )}
           </div>
@@ -188,6 +187,11 @@ export default function UserProfile() {
               key: 'wallets',
               label: 'Wallets',
               children: <WalletsTab userId={userId!} />,
+            },
+            {
+              key: 'deposits',
+              label: 'Deposits',
+              children: <DepositsTab userId={userId!} />,
             },
           ]}
         />

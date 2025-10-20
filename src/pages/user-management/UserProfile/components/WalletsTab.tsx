@@ -1,5 +1,16 @@
-import { ConfigProvider, Table, Tag } from 'antd';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
+import {
+  Button,
+  ConfigProvider,
+  Modal,
+  message,
+  Table,
+  Tag,
+  Tooltip,
+} from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import { useState } from 'react';
+import CopyComponent from '@/components/CopyComponent';
 
 interface Props {
   userId: string;
@@ -7,105 +18,125 @@ interface Props {
 
 interface Wallet {
   id: string;
-  currency: string;
-  type: 'Crypto' | 'Fiat';
+  address: string;
+  chain: 'TRC-20' | 'ERC-20' | 'TOK';
+  currency: string; // Currently only 'GBPC'
   balance: number;
-  availableBalance: number;
-  frozenBalance: number;
-  address?: string;
-  status: 'Active' | 'Frozen' | 'Inactive';
+  status: 'Active' | 'Frozen';
 }
 
 export default function WalletsTab({ userId }: Props) {
+  const [wallets, setWallets] = useState<Wallet[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [modal, contextHolder] = Modal.useModal();
+
   // TODO: Fetch wallets from API
-  const wallets: Wallet[] = [];
+  // useEffect(() => {
+  //   fetchWallets();
+  // }, [userId]);
+
+  const handleFreezeWallet = (wallet: Wallet) => {
+    const isFrozen = wallet.status === 'Frozen';
+    const action = isFrozen ? 'unfreeze' : 'freeze';
+
+    modal.confirm({
+      title: `${isFrozen ? 'Unfreeze' : 'Freeze'} Wallet`,
+      icon: <ExclamationCircleOutlined />,
+      content: isFrozen
+        ? 'Are you sure you want to unfreeze this wallet? The user will be able to deposit, withdraw, and transfer funds from this wallet.'
+        : 'Are you sure you want to freeze this wallet? The user will not be able to deposit, withdraw, or transfer funds from this wallet while frozen.',
+      okText: isFrozen ? 'Unfreeze' : 'Freeze',
+      okButtonProps: { danger: !isFrozen },
+      cancelText: 'Cancel',
+      onOk: async () => {
+        try {
+          setLoading(true);
+          // TODO: Call API to freeze/unfreeze wallet
+          // await request(`/api/wallets/${wallet.id}/${action}`, { method: 'POST' });
+
+          // Update local state
+          setWallets((prev) =>
+            prev.map((w) =>
+              w.id === wallet.id
+                ? { ...w, status: isFrozen ? 'Active' : 'Frozen' }
+                : w,
+            ),
+          );
+
+          message.success(`Wallet ${action}d successfully`);
+        } catch (error) {
+          message.error(`Failed to ${action} wallet`);
+          console.error(error);
+        } finally {
+          setLoading(false);
+        }
+      },
+    });
+  };
 
   const columns: ColumnsType<Wallet> = [
+    {
+      title: 'Wallet Address',
+      dataIndex: 'address',
+      key: 'address',
+      render: (address: string) => (
+        <div className="flex items-center gap-2">
+          <Tooltip title={address}>
+            <span className="font-mono text-sm">
+              {address.slice(0, 10)}...{address.slice(-8)}
+            </span>
+          </Tooltip>
+          <CopyComponent text={address} />
+        </div>
+      ),
+    },
+    {
+      title: 'Chain',
+      dataIndex: 'chain',
+      key: 'chain',
+      render: (chain: string) => <Tag color="blue">{chain}</Tag>,
+    },
     {
       title: 'Currency',
       dataIndex: 'currency',
       key: 'currency',
-      width: 120,
       render: (text) => <span className="font-medium">{text}</span>,
-    },
-    {
-      title: 'Type',
-      dataIndex: 'type',
-      key: 'type',
-      width: 100,
-      render: (type: string) => (
-        <Tag color={type === 'Crypto' ? 'blue' : 'green'}>{type}</Tag>
-      ),
     },
     {
       title: 'Balance',
       dataIndex: 'balance',
       key: 'balance',
-      width: 150,
       align: 'right',
       render: (balance: number, record) => (
-        <span className="font-medium">
-          {balance.toFixed(8)} {record.currency}
+        <span className="font-medium text-base">
+          {balance.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}{' '}
+          {record.currency}
         </span>
       ),
     },
     {
-      title: 'Available',
-      dataIndex: 'availableBalance',
-      key: 'availableBalance',
-      width: 150,
+      title: 'Action',
+      key: 'action',
       align: 'right',
-      render: (balance: number, record) => (
-        <span className="text-green-600">
-          {balance.toFixed(8)} {record.currency}
-        </span>
+      render: (_, record) => (
+        <Button
+          type="link"
+          danger={record.status === 'Active'}
+          onClick={() => handleFreezeWallet(record)}
+          loading={loading}
+        >
+          {record.status === 'Frozen' ? 'Unfreeze Wallet' : 'Freeze Wallet'}
+        </Button>
       ),
-    },
-    {
-      title: 'Frozen',
-      dataIndex: 'frozenBalance',
-      key: 'frozenBalance',
-      width: 150,
-      align: 'right',
-      render: (balance: number, record) => (
-        <span className="text-orange-600">
-          {balance.toFixed(8)} {record.currency}
-        </span>
-      ),
-    },
-    {
-      title: 'Address',
-      dataIndex: 'address',
-      key: 'address',
-      width: 200,
-      ellipsis: true,
-      render: (address) => address || '-',
-    },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      width: 100,
-      render: (status: string) => {
-        const colorMap: Record<string, string> = {
-          Active: 'green',
-          Frozen: 'orange',
-          Inactive: 'default',
-        };
-        return <Tag color={colorMap[status]}>{status}</Tag>;
-      },
     },
   ];
 
   return (
-    <div className="py-6">
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-[#202B4B]">Wallets</h3>
-        <p className="text-sm text-[#8C8C8C]">
-          View and manage user's crypto and fiat wallets
-        </p>
-      </div>
-
+    <>
+      {contextHolder}
       <ConfigProvider
         theme={{
           components: {
@@ -123,17 +154,16 @@ export default function WalletsTab({ userId }: Props) {
           dataSource={wallets}
           rowKey="id"
           size="middle"
-          scroll={{ x: 1000 }}
           pagination={{
             pageSize: 10,
             showSizeChanger: true,
             showTotal: (total) => `Total ${total} wallets`,
           }}
           locale={{
-            emptyText: 'No wallets found',
+            emptyText: 'No wallets have been assigned to this user.',
           }}
         />
       </ConfigProvider>
-    </div>
+    </>
   );
 }
