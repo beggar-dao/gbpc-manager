@@ -16,7 +16,7 @@ export default function AccountInfoMainTab({ userProfile, userId }: Props) {
 
   return (
     <div>
-      <div className="mb-6">
+      {/* TODO: <div className="mb-6">
         <Segmented
           value={activeSubTab}
           onChange={setActiveSubTab}
@@ -25,7 +25,7 @@ export default function AccountInfoMainTab({ userProfile, userId }: Props) {
             { label: 'Login History', value: 'login-history' },
           ]}
         />
-      </div>
+      </div> */}
 
       <div>
         {activeSubTab === 'account-details' && (

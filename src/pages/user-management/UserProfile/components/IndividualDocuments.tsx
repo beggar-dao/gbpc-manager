@@ -1,51 +1,71 @@
-import { Image } from 'antd';
+import { Alert, Image, Spin } from 'antd';
+import { useRequest } from '@umijs/max';
+import dayjs from 'dayjs';
+import { getUserRealNameProfile } from '@/services/user-real-name';
+import type { UserRealNameResponse } from '@/services/types/user-real-name';
 
 interface Props {
   userId: string;
 }
 
+// Certificate type mapping
+const CERTIFICATE_TYPE_MAP: Record<number, string> = {
+  0: 'Passport',
+  1: 'Driving Licence',
+  2: 'National ID',
+};
+
+// Professional status mapping
+const PROFESSIONAL_STATUS_MAP: Record<number, string> = {
+  0: 'Unemployed',
+  1: 'Salaried',
+  2: 'Self-employed',
+  3: 'Retired',
+  4: 'Student',
+};
+
 export default function IndividualDocuments({ userId }: Props) {
-  // Mock data - replace with actual API data
-  const personalInfo = {
-    firstName: 'Oscar',
-    lastName: 'Pilari',
-    dateOfBirth: '21/09/1995',
-    countryOfBirth: 'Italy',
-    nationality: 'Italy',
-  };
+  const { data: realNameData, loading, error } = useRequest<UserRealNameResponse>(
+    () => getUserRealNameProfile(userId),
+    {
+      ready: !!userId,
+    },
+  );
 
-  const addressInfo = {
-    firstName: 'Oscar',
-    lastName: 'Pilari',
-    dateOfBirth: '21/09/1995',
-    countryOfBirth: 'Italy',
-    nationality: 'Italy',
-    addressProof: '/api/placeholder/150/100', // Replace with actual image URL
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Spin size="large" />
+      </div>
+    );
+  }
 
-  const financialInfo = {
-    plannedAnnualInvestment: '5000 - 20000',
-    annualIncomeEarnings: '10000 - 50000',
-    estimatedTotalWealth: '20001 - 100001',
-    sourceOfFunds: 'XXXXXXXXXX',
-  };
+  if (error) {
+    return (
+      <Alert
+        message="Error"
+        description="Failed to load individual documents. Please try again later."
+        type="error"
+        showIcon
+        className="mb-8"
+      />
+    );
+  }
 
-  const occupationInfo = {
-    occupationInformation:
-      "The standard lorem ipsum passage has been a printer's friend for centuries. Like stock photos today, it served as a placeholder for actual content.",
-    professionalStatus: 'Salaried',
-  };
-
-  const documents = {
-    countryOfIssue: 'Canada',
-    documentType: 'Driving License',
-    frontSide: '/api/placeholder/150/100', // Replace with actual image URL
-    backSide: '/api/placeholder/150/100', // Replace with actual image URL
-    selfie: '/api/placeholder/150/100', // Replace with actual image URL
-  };
+  if (!realNameData) {
+    return (
+      <Alert
+        message="No Data"
+        description="No individual KYC data found for this user."
+        type="info"
+        showIcon
+        className="mb-8"
+      />
+    );
+  }
 
   return (
-    <div>
+    <div className="mb-8">
       {/* Personal Info Section */}
       <div className="mb-8">
         <h3 className="text-lg font-semibold text-[#202B4B] mb-6">
@@ -57,7 +77,7 @@ export default function IndividualDocuments({ userId }: Props) {
               First Name
             </label>
             <div className="text-base text-[#202B4B]">
-              {personalInfo.firstName}
+              {realNameData.firstname || '-'}
             </div>
           </div>
           <div>
@@ -65,7 +85,7 @@ export default function IndividualDocuments({ userId }: Props) {
               Last Name
             </label>
             <div className="text-base text-[#202B4B]">
-              {personalInfo.lastName}
+              {realNameData.lastname || '-'}
             </div>
           </div>
           <div>
@@ -73,7 +93,9 @@ export default function IndividualDocuments({ userId }: Props) {
               Date Of Birth (DOB)
             </label>
             <div className="text-base text-[#202B4B]">
-              {personalInfo.dateOfBirth}
+              {realNameData.birthday
+                ? dayjs(realNameData.birthday).format('DD/MM/YYYY')
+                : '-'}
             </div>
           </div>
           <div>
@@ -81,7 +103,7 @@ export default function IndividualDocuments({ userId }: Props) {
               Country of Birth
             </label>
             <div className="text-base text-[#202B4B]">
-              {personalInfo.countryOfBirth}
+              {realNameData.birthCountry || '-'}
             </div>
           </div>
           <div>
@@ -89,7 +111,7 @@ export default function IndividualDocuments({ userId }: Props) {
               Nationality
             </label>
             <div className="text-base text-[#202B4B]">
-              {personalInfo.nationality}
+              {realNameData.nationality || '-'}
             </div>
           </div>
         </div>
@@ -103,42 +125,42 @@ export default function IndividualDocuments({ userId }: Props) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 max-w-4xl">
           <div>
             <label className="block text-sm text-[#8C8C8C] mb-2">
-              First Name
+              Street
             </label>
             <div className="text-base text-[#202B4B]">
-              {addressInfo.firstName}
+              {realNameData.street || '-'}
             </div>
           </div>
           <div>
             <label className="block text-sm text-[#8C8C8C] mb-2">
-              Last Name
+              City
             </label>
             <div className="text-base text-[#202B4B]">
-              {addressInfo.lastName}
+              {realNameData.city || '-'}
             </div>
           </div>
           <div>
             <label className="block text-sm text-[#8C8C8C] mb-2">
-              Date Of Birth (DOB)
+              Province
             </label>
             <div className="text-base text-[#202B4B]">
-              {addressInfo.dateOfBirth}
+              {realNameData.province || '-'}
             </div>
           </div>
           <div>
             <label className="block text-sm text-[#8C8C8C] mb-2">
-              Country of Birth
+              Postcode
             </label>
             <div className="text-base text-[#202B4B]">
-              {addressInfo.countryOfBirth}
+              {realNameData.postcode || '-'}
             </div>
           </div>
           <div>
             <label className="block text-sm text-[#8C8C8C] mb-2">
-              Nationality
+              Country
             </label>
             <div className="text-base text-[#202B4B]">
-              {addressInfo.nationality}
+              {realNameData.country || '-'}
             </div>
           </div>
           <div>
@@ -146,18 +168,22 @@ export default function IndividualDocuments({ userId }: Props) {
               Address Proof
             </label>
             <div className="mt-2">
-              <Image
-                src={addressInfo.addressProof}
-                alt="Address Proof"
-                width={120}
-                height={80}
-                className="rounded border border-gray-200"
-                placeholder={
-                  <div className="w-[120px] h-[80px] bg-gray-100 rounded flex items-center justify-center">
-                    <span className="text-gray-400">Loading...</span>
-                  </div>
-                }
-              />
+              {realNameData.addressProof ? (
+                <Image
+                  src={realNameData.addressProof}
+                  alt="Address Proof"
+                  width={120}
+                  height={80}
+                  className="rounded border border-gray-200"
+                  placeholder={
+                    <div className="w-[120px] h-[80px] bg-gray-100 rounded flex items-center justify-center">
+                      <span className="text-gray-400">Loading...</span>
+                    </div>
+                  }
+                />
+              ) : (
+                <span className="text-[#8C8C8C]">No document uploaded</span>
+              )}
             </div>
           </div>
         </div>
@@ -174,7 +200,7 @@ export default function IndividualDocuments({ userId }: Props) {
               Planned Annual Investment
             </label>
             <div className="text-base text-[#202B4B]">
-              {financialInfo.plannedAnnualInvestment}
+              {realNameData.plannedAnnualInvestment || '-'}
             </div>
           </div>
           <div>
@@ -182,7 +208,7 @@ export default function IndividualDocuments({ userId }: Props) {
               Estimated Total Wealth
             </label>
             <div className="text-base text-[#202B4B]">
-              {financialInfo.estimatedTotalWealth}
+              {realNameData.estimatedTotalWealth || '-'}
             </div>
           </div>
           <div>
@@ -190,7 +216,7 @@ export default function IndividualDocuments({ userId }: Props) {
               Annual Income/Earnings
             </label>
             <div className="text-base text-[#202B4B]">
-              {financialInfo.annualIncomeEarnings}
+              {realNameData.annualEarnings || '-'}
             </div>
           </div>
           <div>
@@ -198,7 +224,7 @@ export default function IndividualDocuments({ userId }: Props) {
               Source of Funds
             </label>
             <div className="text-base text-[#202B4B]">
-              {financialInfo.sourceOfFunds}
+              {realNameData.sourceOfFunds || '-'}
             </div>
           </div>
         </div>
@@ -215,7 +241,7 @@ export default function IndividualDocuments({ userId }: Props) {
               Occupation Information
             </label>
             <div className="text-base text-[#202B4B]">
-              {occupationInfo.occupationInformation}
+              {realNameData.occupationDescription || '-'}
             </div>
           </div>
           <div>
@@ -223,7 +249,9 @@ export default function IndividualDocuments({ userId }: Props) {
               Professional Status
             </label>
             <div className="text-base text-[#202B4B]">
-              {occupationInfo.professionalStatus}
+              {realNameData.professionalStatus !== undefined
+                ? PROFESSIONAL_STATUS_MAP[realNameData.professionalStatus] || '-'
+                : '-'}
             </div>
           </div>
         </div>
@@ -238,7 +266,7 @@ export default function IndividualDocuments({ userId }: Props) {
               Country of Issue
             </label>
             <div className="text-base text-[#202B4B]">
-              {documents.countryOfIssue}
+              {realNameData.certificateCountry || '-'}
             </div>
           </div>
           <div>
@@ -246,7 +274,17 @@ export default function IndividualDocuments({ userId }: Props) {
               Document Type
             </label>
             <div className="text-base text-[#202B4B]">
-              {documents.documentType}
+              {realNameData.certificateType !== undefined
+                ? CERTIFICATE_TYPE_MAP[realNameData.certificateType] || '-'
+                : '-'}
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm text-[#8C8C8C] mb-2">
+              Certificate Number
+            </label>
+            <div className="text-base text-[#202B4B]">
+              {realNameData.certificateNumber || '-'}
             </div>
           </div>
           <div>
@@ -254,18 +292,22 @@ export default function IndividualDocuments({ userId }: Props) {
               Front Side
             </label>
             <div className="mt-2">
-              <Image
-                src={documents.frontSide}
-                alt="Front Side"
-                width={150}
-                height={100}
-                className="rounded border border-gray-200"
-                placeholder={
-                  <div className="w-[150px] h-[100px] bg-gray-100 rounded flex items-center justify-center">
-                    <span className="text-gray-400">Loading...</span>
-                  </div>
-                }
-              />
+              {realNameData.firstPhoto ? (
+                <Image
+                  src={realNameData.firstPhoto}
+                  alt="Front Side"
+                  width={150}
+                  height={100}
+                  className="rounded border border-gray-200"
+                  placeholder={
+                    <div className="w-[150px] h-[100px] bg-gray-100 rounded flex items-center justify-center">
+                      <span className="text-gray-400">Loading...</span>
+                    </div>
+                  }
+                />
+              ) : (
+                <span className="text-[#8C8C8C]">No document uploaded</span>
+              )}
             </div>
           </div>
           <div>
@@ -273,35 +315,43 @@ export default function IndividualDocuments({ userId }: Props) {
               Back Side
             </label>
             <div className="mt-2">
-              <Image
-                src={documents.backSide}
-                alt="Back Side"
-                width={150}
-                height={100}
-                className="rounded border border-gray-200"
-                placeholder={
-                  <div className="w-[150px] h-[100px] bg-gray-100 rounded flex items-center justify-center">
-                    <span className="text-gray-400">Loading...</span>
-                  </div>
-                }
-              />
+              {realNameData.secondPhoto ? (
+                <Image
+                  src={realNameData.secondPhoto}
+                  alt="Back Side"
+                  width={150}
+                  height={100}
+                  className="rounded border border-gray-200"
+                  placeholder={
+                    <div className="w-[150px] h-[100px] bg-gray-100 rounded flex items-center justify-center">
+                      <span className="text-gray-400">Loading...</span>
+                    </div>
+                  }
+                />
+              ) : (
+                <span className="text-[#8C8C8C]">No document uploaded</span>
+              )}
             </div>
           </div>
           <div>
             <label className="block text-sm text-[#8C8C8C] mb-2">Selfie</label>
             <div className="mt-2">
-              <Image
-                src={documents.selfie}
-                alt="Selfie"
-                width={150}
-                height={100}
-                className="rounded border border-gray-200"
-                placeholder={
-                  <div className="w-[150px] h-[100px] bg-gray-100 rounded flex items-center justify-center">
-                    <span className="text-gray-400">Loading...</span>
-                  </div>
-                }
-              />
+              {realNameData.personalPhoto ? (
+                <Image
+                  src={realNameData.personalPhoto}
+                  alt="Selfie"
+                  width={150}
+                  height={100}
+                  className="rounded border border-gray-200"
+                  placeholder={
+                    <div className="w-[150px] h-[100px] bg-gray-100 rounded flex items-center justify-center">
+                      <span className="text-gray-400">Loading...</span>
+                    </div>
+                  }
+                />
+              ) : (
+                <span className="text-[#8C8C8C]">No document uploaded</span>
+              )}
             </div>
           </div>
         </div>
