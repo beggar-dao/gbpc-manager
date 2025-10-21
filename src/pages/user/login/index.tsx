@@ -52,6 +52,7 @@ const Login: React.FC = () => {
               rules={[
                 {
                   required: true,
+                  type: 'email',
                   message: (
                     <FormattedMessage
                       id="pages.login.email.required"

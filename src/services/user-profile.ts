@@ -31,11 +31,8 @@ export function getUserProfile(userId: string): Promise<UserProfile> {
  * @param data - Updated profile data
  * @returns Promise<UserProfile>
  */
-export function updateUserProfile(
-  userId: string,
-  data: UpdateUserProfileRequest,
-): Promise<UserProfile> {
-  return request<UserProfile>(`/user/${userId}`, {
+export function updateUserProfile(data: UpdateUserProfileRequest): Promise<UserProfile> {
+  return request<UserProfile>(`/user`, {
     method: 'PUT',
     data,
   });

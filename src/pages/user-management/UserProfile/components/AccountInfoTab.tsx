@@ -1,31 +1,40 @@
 import { useRequest } from '@umijs/max';
-import { Button, Form, Input, Select, message, Modal } from 'antd';
+import { Button, Form, Input, Select, message } from 'antd';
 import { Country } from 'country-state-city';
-import dayjs from 'dayjs';
 import { useState } from 'react';
-import {
-  updateUserProfile,
-  updateUserSecurity,
-  changeUserPassword,
-} from '@/services/user-profile';
+import { updateUserProfile } from '@/services/user-profile';
+import { getRoles } from '@/services/role';
+import type { RoleResponse, Role } from '@/services/types/role';
 import {
   AccountStatus,
-  UserRole,
   TwoFactorStatus,
   type UserProfile,
 } from '@/services/types/user-profile';
+import { ChangePasswordModal } from './modals';
 
 interface Props {
   userProfile: UserProfile;
+  userId: string;
+  refresh?: () => Promise<unknown>;
 }
 
-export default function AccountInfoTab({ userProfile }: Props) {
+export default function AccountInfoTab({ userProfile, refresh }: Props) {
   const [form] = Form.useForm();
   const [securityForm] = Form.useForm();
   const [isEditingAccount, setIsEditingAccount] = useState(false);
   const [isEditingSecurity, setIsEditingSecurity] = useState(false);
   const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
-  const [newPassword, setNewPassword] = useState('');
+  const [updateSecurityLoading, setUpdateSecurityLoading] = useState(false);
+
+  // Fetch roles from API
+  const { data: roles, loading: rolesLoading } = useRequest<RoleResponse>(
+    () => getRoles(),
+    {
+      onError: (error) => {
+        console.error('Failed to fetch roles:', error);
+      },
+    },
+  );
 
   // Get all countries
   const countries = Country.getAllCountries().map((country) => ({
@@ -41,14 +50,13 @@ export default function AccountInfoTab({ userProfile }: Props) {
     { label: 'Deactivated', value: AccountStatus.Deactivated },
   ];
 
-  // User Role Options
-  const userRoleOptions = [
-    { label: 'User', value: UserRole.User },
-    { label: 'Admin Support', value: UserRole.AdminSupport },
-    { label: 'Super Admin', value: UserRole.SuperAdmin },
-    { label: 'Finance Management', value: UserRole.FinanceManagement },
-    { label: 'KYC/KYB', value: UserRole.KYCKYB },
-  ];
+  // User Role Options - dynamically generated from API
+  const userRoleOptions = roles?.list
+    ? roles.list.map((role: Role) => ({
+      label: role.name || '',
+      value: role.id!,
+    }))
+    : [];
 
   // 2FA Options
   const twoFactorOptions = [
@@ -58,49 +66,16 @@ export default function AccountInfoTab({ userProfile }: Props) {
 
   // Update account info mutation
   const { run: updateAccount, loading: updateAccountLoading } = useRequest(
-    (values) => updateUserProfile(userProfile.id, values),
+    (values) => updateUserProfile({ ...values, id: userProfile.id }),
     {
       manual: true,
       onSuccess: () => {
         message.success('Account information updated successfully');
         setIsEditingAccount(false);
+        refresh?.();
       },
       onError: (error) => {
         message.error('Failed to update account information');
-        console.error(error);
-      },
-    },
-  );
-
-  // Update security mutation
-  const { run: updateSecurity, loading: updateSecurityLoading } = useRequest(
-    (values) => updateUserSecurity(userProfile.id, values),
-    {
-      manual: true,
-      onSuccess: () => {
-        message.success('Security settings updated successfully');
-        setIsEditingSecurity(false);
-      },
-      onError: (error) => {
-        message.error('Failed to update security settings');
-        console.error(error);
-      },
-    },
-  );
-
-  // Change password mutation
-  const { run: changePassword, loading: changePasswordLoading } = useRequest(
-    (password) =>
-      changeUserPassword({ userId: userProfile.id, newPassword: password }),
-    {
-      manual: true,
-      onSuccess: () => {
-        message.success('Password changed successfully');
-        setIsPasswordModalVisible(false);
-        setNewPassword('');
-      },
-      onError: (error) => {
-        message.error('Failed to change password');
         console.error(error);
       },
     },
@@ -111,8 +86,8 @@ export default function AccountInfoTab({ userProfile }: Props) {
       firstname: userProfile.firstname,
       lastname: userProfile.lastname,
       country: userProfile.country,
-      accountStatus: userProfile.accountStatus,
-      userRole: userProfile.userRole,
+      status: userProfile.status,
+      roleId: userProfile.roleId,
       email: userProfile.email,
     });
     setIsEditingAccount(true);
@@ -149,24 +124,25 @@ export default function AccountInfoTab({ userProfile }: Props) {
   const handleSaveSecurity = async () => {
     try {
       const values = await securityForm.validateFields();
-      updateSecurity({
-        is2FA: values.is2FA === TwoFactorStatus.Enabled,
+      setUpdateSecurityLoading(true);
+      await updateUserProfile({
+        id: userProfile.id,
+        is2FA: values.is2FA,
       });
+      message.success('Security settings updated successfully');
+      setIsEditingSecurity(false);
+      refresh?.();
     } catch (error) {
+      message.error('Failed to update security settings');
       console.error('Validation failed:', error);
+    } finally {
+      setUpdateSecurityLoading(false);
     }
   };
 
-  const handleChangePassword = () => {
-    if (newPassword.length < 8) {
-      message.error('Password must be at least 8 characters long');
-      return;
-    }
-    changePassword(newPassword);
-  };
 
   return (
-    <div>
+    <div className="mb-8">
       {/* Account Info Section */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
@@ -235,7 +211,7 @@ export default function AccountInfoTab({ userProfile }: Props) {
 
             <Form.Item
               label="Account Status"
-              name="accountStatus"
+              name="status"
               rules={[
                 { required: true, message: 'Please select account status' },
               ]}
@@ -248,7 +224,7 @@ export default function AccountInfoTab({ userProfile }: Props) {
               ) : (
                 <div className="text-base text-[#202B4B] py-1">
                   {accountStatusOptions.find(
-                    (opt) => opt.value === userProfile.accountStatus,
+                    (opt) => opt.value === userProfile.status,
                   )?.label || 'Active'}
                 </div>
               )}
@@ -273,19 +249,20 @@ export default function AccountInfoTab({ userProfile }: Props) {
 
             <Form.Item
               label="User Role"
-              name="userRole"
+              name="roleId"
               rules={[{ required: true, message: 'Please select user role' }]}
             >
               {isEditingAccount ? (
                 <Select
                   placeholder="Select user role"
                   options={userRoleOptions}
+                  loading={rolesLoading}
                 />
               ) : (
                 <div className="text-base text-[#202B4B] py-1">
                   {userRoleOptions.find(
-                    (opt) => opt.value === userProfile.userRole,
-                  )?.label || 'User'}
+                    (opt: { label: string; value: number }) => opt.value === userProfile.roleId,
+                  )?.label || '-'}
                 </div>
               )}
             </Form.Item>
@@ -350,15 +327,15 @@ export default function AccountInfoTab({ userProfile }: Props) {
               )}
             </Form.Item>
 
-            <Form.Item label="Last Password Update">
+            {/* TODO: <Form.Item label="Last Password Update">
               <div className="text-base text-[#8C8C8C] py-1">
-                {userProfile.lastPasswordUpdate
-                  ? dayjs(userProfile.lastPasswordUpdate).format(
+                {userProfile.updateTime
+                  ? dayjs(userProfile.updateTime).format(
                     'DD/MM/YYYY HH:mm:ss',
                   )
                   : 'Never updated'}
               </div>
-            </Form.Item>
+            </Form.Item> */}
           </div>
 
           {isEditingSecurity && (
@@ -377,30 +354,11 @@ export default function AccountInfoTab({ userProfile }: Props) {
       </div>
 
       {/* Change Password Modal */}
-      <Modal
-        title="Change Password"
-        open={isPasswordModalVisible}
-        onOk={handleChangePassword}
-        onCancel={() => {
-          setIsPasswordModalVisible(false);
-          setNewPassword('');
-        }}
-        confirmLoading={changePasswordLoading}
-      >
-        <div className="py-4">
-          <label className="block text-sm font-medium text-[#202B4B] mb-2">
-            New Temporary Password
-          </label>
-          <Input.Password
-            placeholder="Enter new password (min 8 characters)"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-          />
-          <p className="text-xs text-[#8C8C8C] mt-2">
-            The user will be required to change this password on next login.
-          </p>
-        </div>
-      </Modal>
+      <ChangePasswordModal
+        visible={isPasswordModalVisible}
+        userId={userProfile.id}
+        onClose={() => setIsPasswordModalVisible(false)}
+      />
     </div>
   );
 }

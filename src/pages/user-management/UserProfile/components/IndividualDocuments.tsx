@@ -170,7 +170,7 @@ export default function IndividualDocuments({ userId }: Props) {
             <div className="mt-2">
               {realNameData.addressProof ? (
                 <Image
-                  src={realNameData.addressProof}
+                  src={`data:image/png;base64,${realNameData.addressProof}`}
                   alt="Address Proof"
                   width={120}
                   height={80}
@@ -294,7 +294,7 @@ export default function IndividualDocuments({ userId }: Props) {
             <div className="mt-2">
               {realNameData.firstPhoto ? (
                 <Image
-                  src={realNameData.firstPhoto}
+                  src={`data:image/png;base64,${realNameData.firstPhoto}`}
                   alt="Front Side"
                   width={150}
                   height={100}
@@ -317,7 +317,7 @@ export default function IndividualDocuments({ userId }: Props) {
             <div className="mt-2">
               {realNameData.secondPhoto ? (
                 <Image
-                  src={realNameData.secondPhoto}
+                  src={`data:image/png;base64,${realNameData.secondPhoto}`}
                   alt="Back Side"
                   width={150}
                   height={100}
@@ -338,7 +338,7 @@ export default function IndividualDocuments({ userId }: Props) {
             <div className="mt-2">
               {realNameData.personalPhoto ? (
                 <Image
-                  src={realNameData.personalPhoto}
+                  src={`data:image/png;base64,${realNameData.personalPhoto}`}
                   alt="Selfie"
                   width={150}
                   height={100}

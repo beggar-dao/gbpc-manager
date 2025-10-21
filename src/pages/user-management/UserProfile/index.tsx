@@ -23,7 +23,7 @@ export default function UserProfile() {
   const { userId } = useParams<{ userId: string }>();
   const [activeTab, setActiveTab] = useState('account-info');
 
-  const { data: userProfile, loading } = useRequest<UserProfileType>(
+  const { data: userProfile, loading, refresh } = useRequest<UserProfileType>(
     () => getUserProfile(userId!),
     {
       ready: !!userId,
@@ -37,8 +37,6 @@ export default function UserProfile() {
       </div>
     );
   }
-
-  console.log('userProfile', userProfile);
 
   if (!userProfile) {
     return (
@@ -168,8 +166,9 @@ export default function UserProfile() {
               label: 'Account Info',
               children: (
                 <AccountInfoMainTab
-                  userProfile={userProfile}
+                  userProfile={userProfile as UserProfileType}
                   userId={userId!}
+                  refresh={refresh}
                 />
               ),
             },

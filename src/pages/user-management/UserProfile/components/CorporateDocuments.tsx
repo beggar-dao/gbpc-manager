@@ -1,151 +1,63 @@
-import { Collapse, Image } from 'antd';
+import { Alert, Collapse, Spin } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
+import { useRequest } from '@umijs/max';
+import { getUserBusinessRealNameProfile } from '@/services/user-business-real-name';
+import type { UserBusinessRealNameResponse } from '@/services/types/user-business-real-name';
 
 interface Props {
   userId: string;
 }
 
-interface UBO {
-  firstName: string;
-  lastName: string;
-  documentType: string;
-  email: string;
-  frontSide: string;
-  backSide: string;
-  selfie: string;
-}
-
-interface Representative {
-  firstName: string;
-  lastName: string;
-  documentType: string;
-  email: string;
-  frontSide: string;
-  backSide: string;
-  selfie: string;
-}
-
 export default function CorporateDocuments({ userId }: Props) {
-  // Mock data - replace with actual API data
-  const companyInfo = {
-    companyName: 'Alfa Technologies L.L.C',
-    registrationNo: '111111232333444432d',
-    legalAddress: 'Door no34 We Work , one Central, Dubai UAE',
-    taxId: '',
-    nationality: 'Italy',
-  };
-
-  const ubos: UBO[] = [
+  const { data: businessData, loading, error } = useRequest<UserBusinessRealNameResponse>(
+    () => getUserBusinessRealNameProfile(userId),
     {
-      firstName: 'Oscar',
-      lastName: 'Pilari',
-      documentType: 'Passport',
-      email: 'Oscar@vn.com',
-      frontSide: '/api/placeholder/150/100',
-      backSide: '/api/placeholder/150/100',
-      selfie: '/api/placeholder/150/100',
+      ready: !!userId,
     },
-  ];
+  );
 
-  const representatives: Representative[] = [
-    {
-      firstName: 'Oscar',
-      lastName: 'Pilari',
-      documentType: 'Passport',
-      email: 'Oscar@vn.com',
-      frontSide: '/api/placeholder/150/100',
-      backSide: '/api/placeholder/150/100',
-      selfie: '/api/placeholder/150/100',
-    },
-  ];
-
-  const industryDetails = {
-    industryDescription:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ornare tempus aliquet. Pellentesque finibus, est et iaculis suscipit, dolor nulla commodo dui, nec ultricies arcu nisl.',
-    plannedInvestmentPerYear: '10000-20000',
-  };
-
-  // Render UBO/Representative card
-  const renderPersonCard = (person: UBO | Representative) => (
-    <div className="bg-[#F5F7FA] p-6 rounded-lg">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
-        <div>
-          <label className="block text-sm text-[#8C8C8C] mb-2">
-            First name
-          </label>
-          <div className="text-base text-[#202B4B]">{person.firstName}</div>
-        </div>
-        <div>
-          <label className="block text-sm text-[#8C8C8C] mb-2">Last Name</label>
-          <div className="text-base text-[#202B4B]">{person.lastName}</div>
-        </div>
-        <div>
-          <label className="block text-sm text-[#8C8C8C] mb-2">
-            Document Type
-          </label>
-          <div className="text-base text-[#202B4B]">{person.documentType}</div>
-        </div>
-        <div>
-          <label className="block text-sm text-[#8C8C8C] mb-2">Email</label>
-          <div className="text-base text-[#202B4B]">{person.email}</div>
-        </div>
-        <div>
-          <label className="block text-sm text-[#8C8C8C] mb-2">Front Side</label>
-          <div className="mt-2">
-            <Image
-              src={person.frontSide}
-              alt="Front Side"
-              width={150}
-              height={100}
-              className="rounded border border-gray-200"
-              placeholder={
-                <div className="w-[150px] h-[100px] bg-gray-100 rounded flex items-center justify-center">
-                  <span className="text-gray-400">Loading...</span>
-                </div>
-              }
-            />
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm text-[#8C8C8C] mb-2">Back Side</label>
-          <div className="mt-2">
-            <Image
-              src={person.backSide}
-              alt="Back Side"
-              width={150}
-              height={100}
-              className="rounded border border-gray-200"
-              placeholder={
-                <div className="w-[150px] h-[100px] bg-gray-100 rounded flex items-center justify-center">
-                  <span className="text-gray-400">Loading...</span>
-                </div>
-              }
-            />
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm text-[#8C8C8C] mb-2">Selfie</label>
-          <div className="mt-2">
-            <Image
-              src={person.selfie}
-              alt="Selfie"
-              width={150}
-              height={100}
-              className="rounded border border-gray-200"
-              placeholder={
-                <div className="w-[150px] h-[100px] bg-gray-100 rounded flex items-center justify-center">
-                  <span className="text-gray-400">Loading...</span>
-                </div>
-              }
-            />
-          </div>
-        </div>
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Spin size="large" />
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert
+        message="Error"
+        description="Failed to load corporate documents. Please try again later."
+        type="error"
+        showIcon
+        className="mb-8"
+      />
+    );
+  }
+
+  if (!businessData) {
+    return (
+      <Alert
+        message="No Data"
+        description="No corporate KYC data found for this user."
+        type="info"
+        showIcon
+        className="mb-8"
+      />
+    );
+  }
+
+  // Note: UBO and Representative data would come from separate API endpoints
+  // For now, we'll show a placeholder message
+  const renderNoDataMessage = () => (
+    <div className="bg-[#F5F7FA] p-6 rounded-lg text-center">
+      <span className="text-[#8C8C8C]">No associated parties data available</span>
     </div>
   );
 
   return (
-    <div>
+    <div className="mb-8">
       {/* Company Information Section */}
       <div className="mb-8">
         <h3 className="text-lg font-semibold text-[#202B4B] mb-6">
@@ -157,7 +69,7 @@ export default function CorporateDocuments({ userId }: Props) {
               Company Name
             </label>
             <div className="text-base text-[#202B4B]">
-              {companyInfo.companyName}
+              {businessData.companyName || '-'}
             </div>
           </div>
           <div>
@@ -165,7 +77,7 @@ export default function CorporateDocuments({ userId }: Props) {
               Registration No.
             </label>
             <div className="text-base text-[#202B4B]">
-              {companyInfo.registrationNo}
+              {businessData.registrationNumber || '-'}
             </div>
           </div>
           <div>
@@ -173,13 +85,13 @@ export default function CorporateDocuments({ userId }: Props) {
               Legal Address
             </label>
             <div className="text-base text-[#202B4B]">
-              {companyInfo.legalAddress}
+              {businessData.legalAddress || '-'}
             </div>
           </div>
           <div>
             <label className="block text-sm text-[#8C8C8C] mb-2">Tax ID</label>
             <div className="text-base text-[#202B4B]">
-              {companyInfo.taxId || '-'}
+              {businessData.taxId || '-'}
             </div>
           </div>
           <div>
@@ -187,7 +99,15 @@ export default function CorporateDocuments({ userId }: Props) {
               Nationality
             </label>
             <div className="text-base text-[#202B4B]">
-              {companyInfo.nationality}
+              {businessData.nationality || '-'}
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm text-[#8C8C8C] mb-2">
+              Email
+            </label>
+            <div className="text-base text-[#202B4B]">
+              {businessData.email || '-'}
             </div>
           </div>
         </div>
@@ -214,13 +134,7 @@ export default function CorporateDocuments({ userId }: Props) {
                   UBO's
                 </span>
               ),
-              children: (
-                <div className="space-y-4">
-                  {ubos.map((ubo, index) => (
-                    <div key={index}>{renderPersonCard(ubo)}</div>
-                  ))}
-                </div>
-              ),
+              children: renderNoDataMessage(),
             },
             {
               key: 'representatives',
@@ -229,13 +143,7 @@ export default function CorporateDocuments({ userId }: Props) {
                   Representatives
                 </span>
               ),
-              children: (
-                <div className="space-y-4">
-                  {representatives.map((rep, index) => (
-                    <div key={index}>{renderPersonCard(rep)}</div>
-                  ))}
-                </div>
-              ),
+              children: renderNoDataMessage(),
             },
           ]}
         />
@@ -252,7 +160,7 @@ export default function CorporateDocuments({ userId }: Props) {
               Industry Description
             </label>
             <div className="text-base text-[#202B4B]">
-              {industryDetails.industryDescription}
+              {businessData.industryDescription || '-'}
             </div>
           </div>
           <div>
@@ -260,7 +168,7 @@ export default function CorporateDocuments({ userId }: Props) {
               Planned Investment per Year
             </label>
             <div className="text-base text-[#202B4B]">
-              {industryDetails.plannedInvestmentPerYear}
+              {businessData.plannedInvestment || '-'}
             </div>
           </div>
         </div>

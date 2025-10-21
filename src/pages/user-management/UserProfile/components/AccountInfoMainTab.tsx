@@ -1,4 +1,3 @@
-import { Segmented } from 'antd';
 import { useState } from 'react';
 import type { UserProfile } from '@/services/types/user-profile';
 import AccountInfoTab from './AccountInfoTab';
@@ -7,9 +6,10 @@ import LoginHistoryTab from './LoginHistoryTab';
 interface Props {
   userProfile: UserProfile;
   userId: string;
+  refresh?: () => Promise<unknown>;
 }
 
-export default function AccountInfoMainTab({ userProfile, userId }: Props) {
+export default function AccountInfoMainTab({ userProfile, userId, refresh }: Props) {
   const [activeSubTab, setActiveSubTab] = useState<string | number>(
     'account-details',
   );
@@ -29,7 +29,7 @@ export default function AccountInfoMainTab({ userProfile, userId }: Props) {
 
       <div>
         {activeSubTab === 'account-details' && (
-          <AccountInfoTab userProfile={userProfile} />
+          <AccountInfoTab userProfile={userProfile} userId={userId} refresh={refresh} />
         )}
         {activeSubTab === 'login-history' && (
           <LoginHistoryTab userId={userId} />

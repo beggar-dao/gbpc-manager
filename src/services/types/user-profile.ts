@@ -7,10 +7,10 @@
  * Account Status Enum
  */
 export enum AccountStatus {
-  Active = 'active',
-  Locked = 'locked',
-  WithdrawalsBlocked = 'withdrawals_blocked',
-  Deactivated = 'deactivated',
+  Active = 0,
+  Locked = 1,
+  WithdrawalsBlocked = 2,
+  Deactivated = 3,
 }
 
 /**
@@ -28,8 +28,8 @@ export enum UserRole {
  * Two-Factor Authentication Status
  */
 export enum TwoFactorStatus {
-  Enabled = 'enabled',
-  Disabled = 'disabled',
+  Enabled = 1,
+  Disabled = 0,
 }
 
 /**
@@ -124,17 +124,24 @@ export interface UserProfile {
    * 用户名
    */
   username?: string;
+  /**
+   * 角色 ID
+   */
+  roleId?: number;
 }
 
 /**
  * Update User Profile Request
  */
 export interface UpdateUserProfileRequest {
+  id: string;
   firstname?: string;
   lastname?: string;
   country?: string;
-  accountStatus?: AccountStatus;
-  userRole?: UserRole;
+  is2FA?: boolean;
+  status?: number;
+  roleId?: number;
+  password?: string;
 }
 
 /**
