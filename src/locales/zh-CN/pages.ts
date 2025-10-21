@@ -8,6 +8,7 @@ export default {
   'pages.login.success': '登录成功！',
   'pages.login.username.placeholder': '用户名: admin or user',
   'pages.login.username.required': '用户名是必填项！',
+  'pages.login.email.required': '邮箱是必填项！',
   'pages.login.password.placeholder': '密码: ant.design',
   'pages.login.password.required': '密码是必填项！',
   'pages.login.phoneLogin.tab': '手机号登录',

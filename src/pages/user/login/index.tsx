@@ -43,19 +43,19 @@ const Login: React.FC = () => {
           <>
             <div className="mt-8"></div>
             <ProFormText
-              name="username"
+              name="email"
               fieldProps={{
                 size: 'large',
                 prefix: <UserOutlined />,
               }}
-              placeholder={'please enter username'}
+              placeholder={'Please enter email'}
               rules={[
                 {
                   required: true,
                   message: (
                     <FormattedMessage
-                      id="pages.login.username.required"
-                      defaultMessage="请输入用户名!"
+                      id="pages.login.email.required"
+                      defaultMessage="请输入邮箱!"
                     />
                   ),
                 },

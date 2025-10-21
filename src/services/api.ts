@@ -1,7 +1,7 @@
 import { request } from "@umijs/max";
 
 export const login = (data: any) => {
-  return request("/admin/user/auth/login", {
+  return request("/user/auth", {
     method: "post",
     data,
   });
