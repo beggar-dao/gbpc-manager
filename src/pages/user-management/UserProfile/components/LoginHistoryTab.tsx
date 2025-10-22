@@ -3,25 +3,26 @@ import {
   Button,
   ConfigProvider,
   DatePicker,
+  Empty,
   Form,
   Input,
+  Modal,
+  message,
   Select,
   Table,
   Tag,
-  message,
-  Modal,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { useState } from 'react';
-import { getLoginHistory, terminateSession } from '@/services/user-profile';
 import {
-  LoginSource,
   DeviceType,
   type LoginHistoryItem,
   type LoginHistoryParams,
   type LoginHistoryResponse,
+  LoginSource,
 } from '@/services/types/user-profile';
+import { getLoginHistory, terminateSession } from '@/services/user-profile';
 
 const { RangePicker } = DatePicker;
 
@@ -171,9 +172,7 @@ export default function LoginHistoryTab({ userId }: Props) {
       width: 150,
       render: (_, { loginDuration, isActive }) => {
         if (isActive) {
-          const duration = Math.floor(
-            (Date.now() - _.loginTime) / 1000 / 60,
-          );
+          const duration = Math.floor((Date.now() - _.loginTime) / 1000 / 60);
           return `${duration} min`;
         }
         return loginDuration ? `${loginDuration} min` : '-';
@@ -318,6 +317,9 @@ export default function LoginHistoryTab({ userId }: Props) {
               showSizeChanger: true,
               showTotal: (total) => `Total ${total} login records`,
               pageSizeOptions: ['10', '20', '50', '100'],
+            }}
+            locale={{
+              emptyText: <Empty />,
             }}
           />
         </ConfigProvider>

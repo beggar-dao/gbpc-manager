@@ -1,15 +1,15 @@
 import { useRequest } from '@umijs/max';
-import { Button, Form, Input, Select, message } from 'antd';
+import { Button, Form, Input, message, Select } from 'antd';
 import { Country } from 'country-state-city';
 import { useState } from 'react';
-import { updateUserProfile } from '@/services/user-profile';
 import { getRoles } from '@/services/role';
-import type { RoleResponse, Role } from '@/services/types/role';
+import type { Role, RoleResponse } from '@/services/types/role';
 import {
   AccountStatus,
   TwoFactorStatus,
   type UserProfile,
 } from '@/services/types/user-profile';
+import { updateUserProfile } from '@/services/user-profile';
 import { ChangePasswordModal } from './modals';
 
 interface Props {
@@ -53,9 +53,9 @@ export default function AccountInfoTab({ userProfile, refresh }: Props) {
   // User Role Options - dynamically generated from API
   const userRoleOptions = roles?.list
     ? roles.list.map((role: Role) => ({
-      label: role.name || '',
-      value: role.id!,
-    }))
+        label: role.name || '',
+        value: role.id!,
+      }))
     : [];
 
   // 2FA Options
@@ -140,7 +140,6 @@ export default function AccountInfoTab({ userProfile, refresh }: Props) {
     }
   };
 
-
   return (
     <div className="mb-8">
       {/* Account Info Section */}
@@ -156,13 +155,7 @@ export default function AccountInfoTab({ userProfile, refresh }: Props) {
 
         <Form form={form} layout="vertical" className="max-w-4xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Form.Item
-              label="First Name"
-              name="firstname"
-              rules={[
-                { required: true, message: 'Please enter first name' },
-              ]}
-            >
+            <Form.Item label="First Name" name="firstname">
               {isEditingAccount ? (
                 <Input placeholder="Enter first name" />
               ) : (
@@ -172,11 +165,7 @@ export default function AccountInfoTab({ userProfile, refresh }: Props) {
               )}
             </Form.Item>
 
-            <Form.Item
-              label="Last Name"
-              name="lastname"
-              rules={[{ required: true, message: 'Please enter last name' }]}
-            >
+            <Form.Item label="Last Name" name="lastname">
               {isEditingAccount ? (
                 <Input placeholder="Enter last name" />
               ) : (
@@ -186,11 +175,7 @@ export default function AccountInfoTab({ userProfile, refresh }: Props) {
               )}
             </Form.Item>
 
-            <Form.Item
-              label="Country"
-              name="country"
-              rules={[{ required: true, message: 'Please select country' }]}
-            >
+            <Form.Item label="Country" name="country">
               {isEditingAccount ? (
                 <Select
                   showSearch
@@ -209,13 +194,7 @@ export default function AccountInfoTab({ userProfile, refresh }: Props) {
               )}
             </Form.Item>
 
-            <Form.Item
-              label="Account Status"
-              name="status"
-              rules={[
-                { required: true, message: 'Please select account status' },
-              ]}
-            >
+            <Form.Item label="Account Status" name="status">
               {isEditingAccount ? (
                 <Select
                   placeholder="Select account status"
@@ -233,10 +212,7 @@ export default function AccountInfoTab({ userProfile, refresh }: Props) {
             <Form.Item
               label="Email Address"
               name="email"
-              rules={[
-                { required: true, message: 'Please enter email' },
-                { type: 'email', message: 'Please enter valid email' },
-              ]}
+              rules={[{ type: 'email', message: 'Please enter valid email' }]}
             >
               {isEditingAccount ? (
                 <Input placeholder="Enter email address" />
@@ -247,11 +223,7 @@ export default function AccountInfoTab({ userProfile, refresh }: Props) {
               )}
             </Form.Item>
 
-            <Form.Item
-              label="User Role"
-              name="roleId"
-              rules={[{ required: true, message: 'Please select user role' }]}
-            >
+            <Form.Item label="User Role" name="roleId">
               {isEditingAccount ? (
                 <Select
                   placeholder="Select user role"
@@ -261,7 +233,8 @@ export default function AccountInfoTab({ userProfile, refresh }: Props) {
               ) : (
                 <div className="text-base text-[#202B4B] py-1">
                   {userRoleOptions.find(
-                    (opt: { label: string; value: number }) => opt.value === userProfile.roleId,
+                    (opt: { label: string; value: number }) =>
+                      opt.value === userProfile.roleId,
                   )?.label || '-'}
                 </div>
               )}
@@ -296,11 +269,7 @@ export default function AccountInfoTab({ userProfile, refresh }: Props) {
 
         <Form form={securityForm} layout="vertical" className="max-w-4xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Form.Item
-              label="2 Factor Authentication"
-              name="is2FA"
-              rules={[{ required: true, message: 'Please select 2FA status' }]}
-            >
+            <Form.Item label="2 Factor Authentication" name="is2FA">
               {isEditingSecurity ? (
                 <Select
                   placeholder="Select 2FA status"

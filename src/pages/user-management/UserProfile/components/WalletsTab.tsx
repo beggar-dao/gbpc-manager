@@ -1,7 +1,9 @@
 import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { useRequest } from '@umijs/max';
 import {
   Button,
   ConfigProvider,
+  Empty,
   Modal,
   message,
   Table,
@@ -11,6 +13,11 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import { useState } from 'react';
 import CopyComponent from '@/components/CopyComponent';
+import type { AccountAssetItem } from '@/services/types/account-asset';
+import {
+  getAccountAssetList,
+  updateAccountAssetStatus,
+} from '@/services/wallet/account-asset';
 
 interface Props {
   userId: string;
@@ -19,25 +26,59 @@ interface Props {
 interface Wallet {
   id: string;
   address: string;
-  chain: 'TRC-20' | 'ERC-20' | 'TOK';
-  currency: string; // Currently only 'GBPC'
-  balance: number;
-  status: 'Active' | 'Frozen';
+  chainId: string;
+  currency: string;
+  balance: string;
+  freezeBalance: string;
+  status: number; // 1: Active, 2: Frozen
 }
 
 export default function WalletsTab({ userId }: Props) {
-  const [wallets, setWallets] = useState<Wallet[]>([]);
   const [loading, setLoading] = useState(false);
   const [modal, contextHolder] = Modal.useModal();
 
-  // TODO: Fetch wallets from API
-  // useEffect(() => {
-  //   fetchWallets();
-  // }, [userId]);
+  const {
+    data,
+    loading: fetchLoading,
+    refresh,
+  } = useRequest(
+    async () => {
+      const response = await getAccountAssetList({
+        userId: Number(userId),
+        pageNumber: 1,
+        pageSize: 100,
+      });
+
+      const walletData: Wallet[] = (response.list || []).map(
+        (item: AccountAssetItem) => ({
+          id: item.id || '',
+          address: item.address || '',
+          chainId: item.chainId || '',
+          currency: item.currency || '',
+          balance: item.balance || '0',
+          freezeBalance: item.freezeBalance || '0',
+          status: 1, // Default to Active, adjust based on your API response
+        }),
+      );
+
+      return walletData;
+    },
+    {
+      ready: !!userId,
+      refreshDeps: [userId],
+      onError: (error) => {
+        message.error('Failed to fetch wallets');
+        console.error(error);
+      },
+    },
+  );
+
+  const wallets = (data as Wallet[] | undefined) ?? [];
 
   const handleFreezeWallet = (wallet: Wallet) => {
-    const isFrozen = wallet.status === 'Frozen';
+    const isFrozen = wallet.status === 2;
     const action = isFrozen ? 'unfreeze' : 'freeze';
+    const newStatus = isFrozen ? 1 : 2; // 1: Active, 2: Frozen
 
     modal.confirm({
       title: `${isFrozen ? 'Unfreeze' : 'Freeze'} Wallet`,
@@ -51,17 +92,13 @@ export default function WalletsTab({ userId }: Props) {
       onOk: async () => {
         try {
           setLoading(true);
-          // TODO: Call API to freeze/unfreeze wallet
-          // await request(`/api/wallets/${wallet.id}/${action}`, { method: 'POST' });
+          await updateAccountAssetStatus({
+            id: Number(wallet.id),
+            status: newStatus,
+          });
 
-          // Update local state
-          setWallets((prev) =>
-            prev.map((w) =>
-              w.id === wallet.id
-                ? { ...w, status: isFrozen ? 'Active' : 'Frozen' }
-                : w,
-            ),
-          );
+          // Refresh wallet list
+          refresh();
 
           message.success(`Wallet ${action}d successfully`);
         } catch (error) {
@@ -92,9 +129,9 @@ export default function WalletsTab({ userId }: Props) {
     },
     {
       title: 'Chain',
-      dataIndex: 'chain',
-      key: 'chain',
-      render: (chain: string) => <Tag color="blue">{chain}</Tag>,
+      dataIndex: 'chainId',
+      key: 'chainId',
+      render: (chainId: string) => <Tag color="blue">{chainId}</Tag>,
     },
     {
       title: 'Currency',
@@ -107,11 +144,11 @@ export default function WalletsTab({ userId }: Props) {
       dataIndex: 'balance',
       key: 'balance',
       align: 'right',
-      render: (balance: number, record) => (
+      render: (balance: string, record) => (
         <span className="font-medium text-base">
-          {balance.toLocaleString('en-US', {
+          {parseFloat(balance).toLocaleString('en-US', {
             minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
+            maximumFractionDigits: 6,
           })}{' '}
           {record.currency}
         </span>
@@ -124,11 +161,11 @@ export default function WalletsTab({ userId }: Props) {
       render: (_, record) => (
         <Button
           type="link"
-          danger={record.status === 'Active'}
+          danger={record.status === 1}
           onClick={() => handleFreezeWallet(record)}
           loading={loading}
         >
-          {record.status === 'Frozen' ? 'Unfreeze Wallet' : 'Freeze Wallet'}
+          {record.status === 2 ? 'Unfreeze Wallet' : 'Freeze Wallet'}
         </Button>
       ),
     },
@@ -154,13 +191,16 @@ export default function WalletsTab({ userId }: Props) {
           dataSource={wallets}
           rowKey="id"
           size="middle"
+          loading={fetchLoading}
           pagination={{
-            pageSize: 10,
+            current: data?._meta?.currentPage || 1,
+            pageSize: data?._meta?.perPage || 10,
+            total: data?._meta?.totalCount || 0,
             showSizeChanger: true,
             showTotal: (total) => `Total ${total} wallets`,
           }}
           locale={{
-            emptyText: 'No wallets have been assigned to this user.',
+            emptyText: <Empty />,
           }}
         />
       </ConfigProvider>

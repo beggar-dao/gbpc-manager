@@ -1,127 +1,140 @@
 import { ExclamationCircleOutlined } from '@ant-design/icons';
-import { Button, ConfigProvider, Modal, message, Table, Tag } from 'antd';
+import { useRequest } from '@umijs/max';
+import {
+  Button,
+  ConfigProvider,
+  Empty,
+  Modal,
+  message,
+  Table,
+  Tag,
+} from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useState } from 'react';
 import CopyComponent from '@/components/CopyComponent';
+import type { WalletPaymentBankItem } from '@/services/types/payment';
+import {
+  deletePaymentBank,
+  getPaymentBankList,
+} from '@/services/wallet/payment';
 
 interface Props {
   userId: string;
 }
 
-interface PaymentMethod {
-  id: string;
-  bankAccountNumber: string;
-  accountHolderName: string;
-  bankName: string;
-  swiftCode: string;
-  iban: string;
-  branch: string;
-  currency: string;
-  billingAddress: string;
-  status: 'Verified' | 'Unverified';
-}
-
 export default function PaymentMethodsTab({ userId }: Props) {
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
-  const [loading, setLoading] = useState(false);
   const [modal, contextHolder] = Modal.useModal();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // TODO: Fetch payment methods from API
-  // useEffect(() => {
-  //   fetchPaymentMethods();
-  // }, [userId]);
+  // Fetch payment methods from API
+  const { data, loading, refresh } = useRequest(
+    () => getPaymentBankList({ userId: Number(userId) }),
+    {
+      refreshDeps: [userId],
+    },
+  );
 
-  const handleDelete = (record: PaymentMethod) => {
+  const paymentMethods = data?.list || [];
+
+  const handleDelete = (record: WalletPaymentBankItem) => {
     modal.confirm({
       title: 'Delete Payment Method',
       icon: <ExclamationCircleOutlined />,
-      content: `Are you sure you want to delete this payment method for ${record.accountHolderName}?`,
+      content: `Are you sure you want to delete this payment method for ${record.holderName}?`,
       okText: 'Delete',
       okButtonProps: { danger: true },
       cancelText: 'Cancel',
       onOk: async () => {
         try {
-          setLoading(true);
-          // TODO: Call API to delete payment method
-          // await request(`/api/payment-methods/${record.id}`, { method: 'DELETE' });
-
-          // Update local state
-          setPaymentMethods((prev) => prev.filter((pm) => pm.id !== record.id));
+          setDeletingId(record.id!);
+          await deletePaymentBank(record.id!);
 
           message.success('Payment method deleted successfully');
+          // Refresh the list
+          refresh();
         } catch (error) {
           message.error('Failed to delete payment method');
           console.error(error);
         } finally {
-          setLoading(false);
+          setDeletingId(null);
         }
       },
     });
   };
 
-  const columns: ColumnsType<PaymentMethod> = [
+  const getStatusTag = (status?: number) => {
+    switch (status) {
+      case 0:
+        return <Tag color="default">Unverified</Tag>;
+      case 1:
+        return <Tag color="processing">Pending Verification</Tag>;
+      case 2:
+        return <Tag color="success">Verified</Tag>;
+      case 3:
+        return <Tag color="error">Verification Failed</Tag>;
+      default:
+        return <Tag>Unknown</Tag>;
+    }
+  };
+
+  const columns: ColumnsType<WalletPaymentBankItem> = [
     {
       title: 'Bank Account Number',
-      dataIndex: 'bankAccountNumber',
-      key: 'bankAccountNumber',
+      dataIndex: 'iban',
+      key: 'iban',
       render: (text: string) => (
         <div className="flex items-center gap-2">
-          <span className="font-mono text-sm">{text}</span>
-          <CopyComponent text={text} />
+          <span className="font-mono text-sm">{text || '--'}</span>
+          {text && <CopyComponent text={text} />}
         </div>
       ),
     },
     {
       title: 'Acct. Holder Name',
-      dataIndex: 'accountHolderName',
-      key: 'accountHolderName',
-      render: (text) => <span className="font-medium">{text}</span>,
+      dataIndex: 'holderName',
+      key: 'holderName',
+      render: (text) => <span className="font-medium">{text || '--'}</span>,
     },
     {
       title: 'Bank Name',
       dataIndex: 'bankName',
       key: 'bankName',
+      render: (text) => text || '--',
     },
     {
       title: 'Swift Code',
-      dataIndex: 'swiftCode',
-      key: 'swiftCode',
+      dataIndex: 'bic',
+      key: 'bic',
       render: (text: string) => (
         <div className="flex items-center gap-2">
-          <span className="font-mono text-sm">{text}</span>
-          <CopyComponent text={text} />
+          <span className="font-mono text-sm">{text || '--'}</span>
+          {text && <CopyComponent text={text} />}
         </div>
       ),
     },
     {
-      title: 'IBAN',
-      dataIndex: 'iban',
-      key: 'iban',
-      render: (text: string) => text || '--',
-    },
-    {
       title: 'Branch',
-      dataIndex: 'branch',
-      key: 'branch',
+      dataIndex: 'bankBranch',
+      key: 'bankBranch',
+      render: (text) => text || '--',
     },
     {
       title: 'Currency',
       dataIndex: 'currency',
       key: 'currency',
-      render: (text) => <span className="font-medium">{text}</span>,
+      render: (text) => <span className="font-medium">{text || '--'}</span>,
     },
     {
       title: 'Billing Address',
       dataIndex: 'billingAddress',
       key: 'billingAddress',
+      render: (text) => text || '--',
     },
     {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (status: string) => (
-        <Tag color={status === 'Verified' ? 'green' : 'red'}>{status}</Tag>
-      ),
+      render: (status: number) => getStatusTag(status),
     },
     {
       title: 'Action',
@@ -133,7 +146,7 @@ export default function PaymentMethodsTab({ userId }: Props) {
           type="link"
           danger
           onClick={() => handleDelete(record)}
-          loading={loading}
+          loading={deletingId === record.id}
         >
           Delete
         </Button>
@@ -162,14 +175,17 @@ export default function PaymentMethodsTab({ userId }: Props) {
           dataSource={paymentMethods}
           rowKey="id"
           size="middle"
+          loading={loading}
           scroll={{ x: 'max-content' }}
           pagination={{
-            pageSize: 10,
+            current: data?._meta?.currentPage || 1,
+            pageSize: data?._meta?.perPage || 10,
+            total: data?._meta?.totalCount || 0,
             showSizeChanger: true,
             showTotal: (total) => `Total ${total} payment methods`,
           }}
           locale={{
-            emptyText: 'No payment methods added yet.',
+            emptyText: <Empty />,
           }}
         />
       </ConfigProvider>

@@ -1,4 +1,4 @@
-import { useRequest, history } from '@umijs/max';
+import { history, useRequest } from '@umijs/max';
 import { Button, ConfigProvider, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
@@ -28,8 +28,6 @@ const UserManagementTable: FunctionComponent<Props> = ({ filterParams }) => {
       refreshDeps: [pageNumber, pageSize, filterParams],
     },
   );
-
-  console.log(data);
 
   const userList = (data as UserManagementResponse) || {
     list: [],
