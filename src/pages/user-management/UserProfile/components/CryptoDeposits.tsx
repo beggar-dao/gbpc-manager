@@ -1,9 +1,11 @@
 import { LinkOutlined } from '@ant-design/icons';
-import { ConfigProvider, Table, Tag, Tooltip } from 'antd';
+import { useRequest } from '@umijs/max';
+import { ConfigProvider, Empty, Table, Tag, Tooltip, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
-import { useState } from 'react';
 import CopyComponent from '@/components/CopyComponent';
+import type { AccountTransactionItem } from '@/services/types/account';
+import { getAccountTransactionList } from '@/services/wallet/account';
 
 interface Props {
   userId: string;
@@ -11,22 +13,51 @@ interface Props {
 
 interface CryptoDeposit {
   id: string;
-  depositTime: string;
+  depositTime: number;
   currency: string;
   chain: string;
   walletAddress: string;
   transactionHash: string;
-  amount: number;
-  status: 'Approved' | 'Pending';
+  amount: string;
+  status: number;
 }
 
 export default function CryptoDeposits({ userId }: Props) {
-  const [cryptoDeposits] = useState<CryptoDeposit[]>([]);
+  const { data, loading } = useRequest(
+    async () => {
+      const response = await getAccountTransactionList({
+        userId: Number(userId),
+        tradeType: 2,
+        pageNumber: 1,
+        pageSize: 10,
+      });
 
-  // TODO: Fetch crypto deposits from API
-  // useEffect(() => {
-  //   fetchCryptoDeposits();
-  // }, [userId]);
+      const deposits: CryptoDeposit[] = (response.list || []).map(
+        (item: AccountTransactionItem) => ({
+          id: item.id || '',
+          depositTime: item.timestamp || item.createTime || 0,
+          currency: item.currency || '',
+          chain: item.chainId || '',
+          walletAddress: item.address || item.toAddress || '',
+          transactionHash: item.txId || '',
+          amount: item.amount || '0',
+          status: item.status || 0,
+        }),
+      );
+
+      return deposits;
+    },
+    {
+      ready: !!userId,
+      refreshDeps: [userId],
+      onError: (error) => {
+        message.error('Failed to fetch crypto deposits');
+        console.error(error);
+      },
+    },
+  );
+
+  const cryptoDeposits = (data as CryptoDeposit[] | undefined) ?? [];
 
   const getBlockchainExplorerUrl = (chain: string, txHash: string): string => {
     // TODO: Map chain to appropriate explorer URL
@@ -34,6 +65,7 @@ export default function CryptoDeposits({ userId }: Props) {
       'ERC-20': `https://etherscan.io/tx/${txHash}`,
       'TRC-20': `https://tronscan.org/#/transaction/${txHash}`,
       'BEP-20': `https://bscscan.com/tx/${txHash}`,
+      'TOK-20': `https://tokescan.com/tx/${txHash}`,
     };
     return explorers[chain] || `#${txHash}`;
   };
@@ -43,7 +75,7 @@ export default function CryptoDeposits({ userId }: Props) {
       title: 'Deposit Time',
       dataIndex: 'depositTime',
       key: 'depositTime',
-      render: (time: string) => (
+      render: (time: number) => (
         <span className="text-sm">
           {dayjs(time).format('YYYY-MM-DD HH:mm:ss')}
         </span>
@@ -104,9 +136,9 @@ export default function CryptoDeposits({ userId }: Props) {
       dataIndex: 'amount',
       key: 'amount',
       align: 'right',
-      render: (amount: number, record) => (
+      render: (amount: string, record) => (
         <span className="font-medium">
-          {amount.toLocaleString('en-US', {
+          {parseFloat(amount).toLocaleString('en-US', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 8,
           })}{' '}
@@ -118,9 +150,17 @@ export default function CryptoDeposits({ userId }: Props) {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (status: string) => (
-        <Tag color={status === 'Approved' ? 'green' : 'orange'}>{status}</Tag>
-      ),
+      render: (status: number) => {
+        const statusMap: Record<number, { text: string; color: string }> = {
+          0: { text: 'Pending Review', color: 'orange' },
+          1: { text: 'Approved', color: 'green' },
+          2: { text: 'Rejected', color: 'red' },
+          3: { text: 'Success', color: 'green' },
+          4: { text: 'Failed', color: 'red' },
+        };
+        const statusInfo = statusMap[status] || { text: 'Unknown', color: 'default' };
+        return <Tag color={statusInfo.color}>{statusInfo.text}</Tag>;
+      },
     },
   ];
 
@@ -142,13 +182,14 @@ export default function CryptoDeposits({ userId }: Props) {
         dataSource={cryptoDeposits}
         rowKey="id"
         size="middle"
+        loading={loading}
         pagination={{
           pageSize: 20,
           showSizeChanger: true,
           showTotal: (total) => `Total ${total} deposits`,
         }}
         locale={{
-          emptyText: 'This user has not made any deposits yet.',
+          emptyText: <Empty />,
         }}
       />
     </ConfigProvider>
