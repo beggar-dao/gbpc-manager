@@ -1,5 +1,5 @@
 import { useRequest } from '@umijs/max';
-import { Button, ConfigProvider, Empty, message, Table, Tag } from 'antd';
+import { ConfigProvider, Empty, message, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import CopyComponent from '@/components/CopyComponent';
@@ -10,12 +10,12 @@ interface Props {
   userId: string;
 }
 
-export default function FiatDeposits({ userId }: Props) {
+export default function FiatWithdrawals({ userId }: Props) {
   const { data, loading } = useRequest(
-    () =>
+    async () =>
       getAccountTransactionList({
         userId,
-        tradeType: 3,
+        tradeType: 4, // 4: FIAT_WITHDRAWAL
         pageNumber: 1,
         pageSize: 20,
       }),
@@ -23,18 +23,18 @@ export default function FiatDeposits({ userId }: Props) {
       ready: !!userId,
       refreshDeps: [userId],
       onError: (error) => {
-        message.error('Failed to fetch fiat deposits');
+        message.error('Failed to fetch fiat withdrawals');
         console.error(error);
       },
     },
   );
 
-  const fiatDeposits =
+  const fiatWithdrawals =
     (data?.list as AccountTransactionItem[] | undefined) ?? [];
 
   const columns: ColumnsType<AccountTransactionItem> = [
     {
-      title: 'Deposit Time',
+      title: 'Withdrawal Time',
       dataIndex: 'createTime',
       key: 'createTime',
       render: (time: number) => (
@@ -50,13 +50,7 @@ export default function FiatDeposits({ userId }: Props) {
       render: (text) => <span className="font-medium">{text}</span>,
     },
     {
-      title: 'Method',
-      dataIndex: 'bankName',
-      key: 'bankName',
-      render: (text) => <span className="text-sm">{text}</span>,
-    },
-    {
-      title: 'Account Number',
+      title: 'Account No.',
       dataIndex: 'accountId',
       key: 'accountId',
       render: (account: string) => (
@@ -67,11 +61,42 @@ export default function FiatDeposits({ userId }: Props) {
       ),
     },
     {
-      title: 'Amount',
+      title: 'Burn Amount (GBPC)',
+      dataIndex: 'amount',
+      key: 'amount',
+      align: 'right',
+      render: (amount: string) => (
+        <span className="font-medium text-red-600">
+          {parseFloat(amount).toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 8,
+          })}{' '}
+          GBPC
+        </span>
+      ),
+    },
+    {
+      title: 'Fees',
+      dataIndex: 'fees',
+      key: 'fees',
+      align: 'right',
+      render: (fee: string, record) => (
+        <span className="text-sm text-orange-600">
+          {parseFloat(fee).toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}{' '}
+          {record.fiatCurrency}
+        </span>
+      ),
+    },
+    {
+      title: 'Withdraw Amount',
       dataIndex: 'fiatAmount',
       key: 'fiatAmount',
+      align: 'right',
       render: (amount: string, record) => (
-        <span className="font-medium">
+        <span className="font-medium text-green-600">
           {parseFloat(amount).toLocaleString('en-US', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
@@ -81,37 +106,12 @@ export default function FiatDeposits({ userId }: Props) {
       ),
     },
     {
-      title: 'Fees',
-      dataIndex: 'fee',
-      key: 'fee',
-      render: (fee: string, record) => (
-        <span className="text-sm text-orange-600">
-          {parseFloat(fee).toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 6,
-          })}{' '}
-          {record.fiatCurrency}
-        </span>
-      ),
-    },
-    {
-      title: 'Transaction No.',
-      dataIndex: 'tradeId',
-      key: 'tradeId',
-      render: (txNo: string) => (
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-sm">{txNo}</span>
-          <CopyComponent text={txNo} />
-        </div>
-      ),
-    },
-    {
-      title: 'Status',
+      title: 'Withdraw Status',
       dataIndex: 'status',
       key: 'status',
       render: (status: number) => {
         const statusMap: Record<number, { text: string; color: string }> = {
-          0: { text: 'Pending Review', color: 'orange' },
+          0: { text: 'Pending', color: 'orange' },
           1: { text: 'Approved', color: 'green' },
           2: { text: 'Rejected', color: 'red' },
           3: { text: 'Success', color: 'green' },
@@ -141,24 +141,21 @@ export default function FiatDeposits({ userId }: Props) {
     >
       <Table
         columns={columns}
-        dataSource={fiatDeposits}
+        dataSource={fiatWithdrawals}
         rowKey="id"
         size="middle"
         loading={loading}
         pagination={{
           pageSize: 20,
           showSizeChanger: true,
-          showTotal: (total) => `Total ${total} deposits`,
+          showTotal: (total) => `Total ${total} withdrawals`,
         }}
         locale={{
           emptyText: (
-            <Empty description="This user has no fiat deposit history." />
+            <Empty description="This user has no fiat withdrawal history." />
           ),
         }}
       />
     </ConfigProvider>
   );
-}
-function handleApproveDeposit(record: AccountTransactionItem): void {
-  throw new Error('Function not implemented.');
 }

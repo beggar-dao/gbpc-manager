@@ -44,7 +44,7 @@ const UserManagementTable: FunctionComponent<Props> = ({ filterParams }) => {
       key: 'createTime',
       width: 180,
       render: (_, { createTime }) => (
-        <span>{dayjs(createTime).format('YYYY/MM/DD HH:mm:ss')}</span>
+        <span>{dayjs(createTime).format('DD/MM/YYYY HH:mm:ss')}</span>
       ),
     },
     {

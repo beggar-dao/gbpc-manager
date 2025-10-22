@@ -17,18 +17,20 @@ import {
   DocumentsTab,
   PaymentMethodsTab,
   WalletsTab,
+  WithdrawalsTab,
 } from './components';
 
 export default function UserProfile() {
   const { userId } = useParams<{ userId: string }>();
   const [activeTab, setActiveTab] = useState('account-info');
 
-  const { data: userProfile, loading, refresh } = useRequest<UserProfileType>(
-    () => getUserProfile(userId!),
-    {
-      ready: !!userId,
-    },
-  );
+  const {
+    data: userProfile,
+    loading,
+    refresh,
+  } = useRequest<UserProfileType>(() => getUserProfile(userId!), {
+    ready: !!userId,
+  });
 
   if (loading) {
     return (
@@ -106,8 +108,8 @@ export default function UserProfile() {
             <div className="text-base font-medium text-[#202B4B]">
               {userProfile.userRole
                 ? userProfile.userRole
-                  .replace(/_/g, ' ')
-                  .replace(/\b\w/g, (l: string) => l.toUpperCase())
+                    .replace(/_/g, ' ')
+                    .replace(/\b\w/g, (l: string) => l.toUpperCase())
                 : 'User'}
             </div>
           </div>
@@ -129,7 +131,7 @@ export default function UserProfile() {
           <div>
             <div className="text-sm text-[#8C8C8C] mb-1">KYC Status</div>
             {userProfile.kycStatus !== null &&
-              userProfile.kycStatus !== undefined ? (
+            userProfile.kycStatus !== undefined ? (
               <Tag
                 color={getKYCStatusClass(userProfile.kycStatus as KYCStatus)}
               >
@@ -191,6 +193,11 @@ export default function UserProfile() {
               key: 'deposits',
               label: 'Deposits',
               children: <DepositsTab userId={userId!} />,
+            },
+            {
+              key: 'withdrawals',
+              label: 'Withdrawals',
+              children: <WithdrawalsTab userId={userId!} />,
             },
           ]}
         />

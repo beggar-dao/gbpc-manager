@@ -33,7 +33,7 @@ export interface AccountTransactionParams {
   /**
    * 用户 ID
    */
-  userId?: number;
+  userId?: string;
 }
 
 /**
@@ -164,6 +164,15 @@ export interface AccountTransactionItem {
    * 用户 ID
    */
   userId?: string;
+}
+
+/**
+ * Account transaction review params
+ */
+export interface AccountTransactionReviewParams {
+  id: string; // 账户交易 ID
+  status: number; // 账户交易状态
+  tradeId: string; // 外部交易 ID
 }
 
 /**

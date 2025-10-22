@@ -11,12 +11,12 @@ interface Props {
   userId: string;
 }
 
-export default function CryptoDeposits({ userId }: Props) {
+export default function CryptoWithdrawals({ userId }: Props) {
   const { data, loading } = useRequest(
-    () =>
+    async () =>
       getAccountTransactionList({
         userId,
-        tradeType: 1,
+        tradeType: 2, // 2: CHAIN_WITHDRAWAL
         pageNumber: 1,
         pageSize: 20,
       }),
@@ -24,13 +24,13 @@ export default function CryptoDeposits({ userId }: Props) {
       ready: !!userId,
       refreshDeps: [userId],
       onError: (error) => {
-        message.error('Failed to fetch crypto deposits');
+        message.error('Failed to fetch crypto withdrawals');
         console.error(error);
       },
     },
   );
 
-  const cryptoDeposits =
+  const cryptoWithdrawals =
     (data?.list as AccountTransactionItem[] | undefined) ?? [];
 
   const getBlockchainExplorerUrl = (txHash: string): string => {
@@ -39,7 +39,7 @@ export default function CryptoDeposits({ userId }: Props) {
 
   const columns: ColumnsType<AccountTransactionItem> = [
     {
-      title: 'Deposit Time',
+      title: 'Withdrawal Time',
       dataIndex: 'createTime',
       key: 'createTime',
       render: (time: number) => (
@@ -56,47 +56,9 @@ export default function CryptoDeposits({ userId }: Props) {
     },
     {
       title: 'Chain',
-      dataIndex: 'chainId',
-      key: 'chainId',
-      render: (chainId: string) => <Tag color="blue">{chainId}</Tag>,
-    },
-    {
-      title: 'Wallet Address',
-      dataIndex: 'address',
-      key: 'address',
-      render: (address: string) => (
-        <div className="flex items-center gap-2">
-          <Tooltip title={address}>
-            <span className="font-mono text-sm">
-              {address.slice(0, 8)}...{address.slice(-6)}
-            </span>
-          </Tooltip>
-          <CopyComponent text={address} />
-        </div>
-      ),
-    },
-    {
-      title: 'Transaction Hash',
-      dataIndex: 'txId',
-      key: 'txId',
-      render: (hash: string) => (
-        <div className="flex items-center gap-2">
-          <Tooltip title={hash}>
-            <span className="font-mono text-sm">
-              {hash.slice(0, 8)}...{hash.slice(-6)}
-            </span>
-          </Tooltip>
-          <CopyComponent text={hash} />
-          <a
-            href={getBlockchainExplorerUrl(hash)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-500 hover:text-blue-700"
-          >
-            <LinkOutlined />
-          </a>
-        </div>
-      ),
+      dataIndex: 'chain',
+      key: 'chain',
+      render: (chain: string) => <Tag color="blue">{chain}</Tag>,
     },
     {
       title: 'Amount',
@@ -114,12 +76,87 @@ export default function CryptoDeposits({ userId }: Props) {
       ),
     },
     {
-      title: 'Status',
+      title: 'Network Fees',
+      dataIndex: 'networkFees',
+      key: 'networkFees',
+      align: 'right',
+      render: (fees: string, record) => (
+        <span className="text-sm text-orange-600">
+          {parseFloat(fees).toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 8,
+          })}{' '}
+          {record.currency}
+        </span>
+      ),
+    },
+    {
+      title: 'Net Amount',
+      dataIndex: 'netAmount',
+      key: 'netAmount',
+      align: 'right',
+      render: (netAmount: string, record) => (
+        <span className="font-medium text-green-600">
+          {parseFloat(netAmount).toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 8,
+          })}{' '}
+          {record.currency}
+        </span>
+      ),
+    },
+    {
+      title: 'Address',
+      dataIndex: 'address',
+      key: 'address',
+      render: (address: string) => (
+        <div className="flex items-center gap-2">
+          <Tooltip title={address}>
+            <span className="font-mono text-sm">
+              {address.slice(0, 8)}...{address.slice(-6)}
+            </span>
+          </Tooltip>
+          <CopyComponent text={address} />
+        </div>
+      ),
+    },
+    {
+      title: 'Transaction Hash',
+      dataIndex: 'txId',
+      key: 'txId',
+      render: (hash: string, record) => {
+        // Only show transaction hash if status is Approved (1) or Success (3)
+        if (record.status !== 1 && record.status !== 3) {
+          return <span className="text-gray-400">--</span>;
+        }
+
+        return (
+          <div className="flex items-center gap-2">
+            <Tooltip title={hash}>
+              <span className="font-mono text-sm">
+                {hash.slice(0, 8)}...{hash.slice(-6)}
+              </span>
+            </Tooltip>
+            <CopyComponent text={hash} />
+            <a
+              href={getBlockchainExplorerUrl(hash)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 hover:text-blue-700"
+            >
+              <LinkOutlined />
+            </a>
+          </div>
+        );
+      },
+    },
+    {
+      title: 'Withdrawal Status',
       dataIndex: 'status',
       key: 'status',
       render: (status: number) => {
         const statusMap: Record<number, { text: string; color: string }> = {
-          0: { text: 'Pending Review', color: 'orange' },
+          0: { text: 'Pending', color: 'orange' },
           1: { text: 'Approved', color: 'green' },
           2: { text: 'Rejected', color: 'red' },
           3: { text: 'Success', color: 'green' },
@@ -149,18 +186,18 @@ export default function CryptoDeposits({ userId }: Props) {
     >
       <Table
         columns={columns}
-        dataSource={cryptoDeposits}
+        dataSource={cryptoWithdrawals}
         rowKey="id"
         size="middle"
         loading={loading}
         pagination={{
           pageSize: 20,
           showSizeChanger: true,
-          showTotal: (total) => `Total ${total} deposits`,
+          showTotal: (total) => `Total ${total} withdrawals`,
         }}
         locale={{
           emptyText: (
-            <Empty description="This user has no crypto deposit history." />
+            <Empty description="This user has no crypto withdrawal history." />
           ),
         }}
       />
