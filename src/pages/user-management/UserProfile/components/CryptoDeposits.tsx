@@ -27,7 +27,7 @@ export default function CryptoDeposits({ userId }: Props) {
     async () => {
       const response = await getAccountTransactionList({
         userId: Number(userId),
-        tradeType: 2,
+        tradeType: 1,
         pageNumber: 1,
         pageSize: 10,
       });

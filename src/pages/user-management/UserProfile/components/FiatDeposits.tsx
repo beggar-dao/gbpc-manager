@@ -29,7 +29,7 @@ export default function FiatDeposits({ userId }: Props) {
     async () => {
       const response = await getAccountTransactionList({
         userId: Number(userId),
-        tradeType: 1, // 1: 法币入金 (Fiat deposit)
+        tradeType: 3,
         pageNumber: 1,
         pageSize: 10,
       });

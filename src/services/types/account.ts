@@ -27,7 +27,7 @@ export interface AccountTransactionParams {
    */
   status?: number;
   /**
-   * 交易类型（1：法币入金，2：法币出金，3：转账，4：提款）
+   * 交易类型（1：CHAIN_DEPOSIT，2：CHAIN_WITHDRAWAL，3：FIAT_DEPOSIT，4：FIAT_WITHDRAWAL）
    */
   tradeType?: number;
   /**
