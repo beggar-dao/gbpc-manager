@@ -51,8 +51,8 @@ export default function FiatWithdrawals({ userId }: Props) {
     },
     {
       title: 'Account No.',
-      dataIndex: 'accountId',
-      key: 'accountId',
+      dataIndex: 'bic',
+      key: 'bic',
       render: (account: string) => (
         <div className="flex items-center gap-2">
           <span className="font-mono text-sm">{account}</span>
@@ -77,8 +77,8 @@ export default function FiatWithdrawals({ userId }: Props) {
     },
     {
       title: 'Fees',
-      dataIndex: 'fees',
-      key: 'fees',
+      dataIndex: 'fee',
+      key: 'fee',
       align: 'right',
       render: (fee: string, record) => (
         <span className="text-sm text-orange-600">

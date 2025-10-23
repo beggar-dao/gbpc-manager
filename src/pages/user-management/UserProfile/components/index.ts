@@ -11,4 +11,5 @@ export { default as IndividualDocuments } from './IndividualDocuments';
 export { default as LoginHistoryTab } from './LoginHistoryTab';
 export { default as PaymentMethodsTab } from './PaymentMethodsTab';
 export { default as WalletsTab } from './WalletsTab';
+export { default as WhitelistAddressTab } from './WhitelistAddressTab';
 export { default as WithdrawalsTab } from './WithdrawalsTab';

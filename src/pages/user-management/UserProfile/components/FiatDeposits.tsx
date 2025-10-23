@@ -57,8 +57,8 @@ export default function FiatDeposits({ userId }: Props) {
     },
     {
       title: 'Account Number',
-      dataIndex: 'accountId',
-      key: 'accountId',
+      dataIndex: 'bic',
+      key: 'bic',
       render: (account: string) => (
         <div className="flex items-center gap-2">
           <span className="font-mono text-sm">{account}</span>

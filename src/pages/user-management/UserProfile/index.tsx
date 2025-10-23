@@ -17,6 +17,7 @@ import {
   DocumentsTab,
   PaymentMethodsTab,
   WalletsTab,
+  WhitelistAddressTab,
   WithdrawalsTab,
 } from './components';
 
@@ -198,6 +199,11 @@ export default function UserProfile() {
               key: 'withdrawals',
               label: 'Withdrawals',
               children: <WithdrawalsTab userId={userId!} />,
+            },
+            {
+              key: 'whitelist',
+              label: 'Whitelist Addresses',
+              children: <WhitelistAddressTab userId={userId!} />,
             },
           ]}
         />

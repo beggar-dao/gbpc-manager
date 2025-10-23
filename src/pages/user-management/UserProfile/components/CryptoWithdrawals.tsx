@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import CopyComponent from '@/components/CopyComponent';
 import type { AccountTransactionItem } from '@/services/types/account';
 import { getAccountTransactionList } from '@/services/wallet/account';
+import { getChainName, getCurrencyName } from '@/utils/chain';
 
 interface Props {
   userId: string;
@@ -52,41 +53,42 @@ export default function CryptoWithdrawals({ userId }: Props) {
       title: 'Currency',
       dataIndex: 'currency',
       key: 'currency',
-      render: (text) => <span className="font-medium">{text}</span>,
+      render: (currency: number) => (
+        <span className="font-medium">{getCurrencyName(currency)}</span>
+      ),
     },
     {
       title: 'Chain',
-      dataIndex: 'chain',
-      key: 'chain',
-      render: (chain: string) => <Tag color="blue">{chain}</Tag>,
+      dataIndex: 'chainId',
+      key: 'chainId',
+      render: (chainId: number) => (
+        <Tag color="blue">{getChainName(chainId)}</Tag>
+      ),
     },
     {
       title: 'Amount',
       dataIndex: 'amount',
       key: 'amount',
-      align: 'right',
       render: (amount: string, record) => (
         <span className="font-medium">
           {parseFloat(amount).toLocaleString('en-US', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 8,
           })}{' '}
-          {record.currency}
+          {getCurrencyName(Number(record.currency))}
         </span>
       ),
     },
     {
       title: 'Network Fees',
-      dataIndex: 'networkFees',
-      key: 'networkFees',
-      align: 'right',
+      dataIndex: 'fee',
+      key: 'fee',
       render: (fees: string, record) => (
         <span className="text-sm text-orange-600">
           {parseFloat(fees).toLocaleString('en-US', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 8,
           })}{' '}
-          {record.currency}
         </span>
       ),
     },
@@ -94,16 +96,21 @@ export default function CryptoWithdrawals({ userId }: Props) {
       title: 'Net Amount',
       dataIndex: 'netAmount',
       key: 'netAmount',
-      align: 'right',
-      render: (netAmount: string, record) => (
-        <span className="font-medium text-green-600">
-          {parseFloat(netAmount).toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 8,
-          })}{' '}
-          {record.currency}
-        </span>
-      ),
+      render: (netAmount: string, record) => {
+        if (!netAmount) {
+          return <span className="text-gray-400">--</span>;
+        }
+
+        return (
+          <span className="font-medium">
+            {parseFloat(netAmount).toLocaleString('en-US', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 8,
+            })}{' '}
+            {getCurrencyName(Number(record.currency))}
+          </span>
+        );
+      },
     },
     {
       title: 'Address',
@@ -132,11 +139,15 @@ export default function CryptoWithdrawals({ userId }: Props) {
 
         return (
           <div className="flex items-center gap-2">
-            <Tooltip title={hash}>
-              <span className="font-mono text-sm">
-                {hash.slice(0, 8)}...{hash.slice(-6)}
-              </span>
-            </Tooltip>
+            {hash ? (
+              <Tooltip title={hash}>
+                <span className="font-mono text-sm">
+                  {hash.slice(0, 8)}...{hash.slice(-6)}
+                </span>
+              </Tooltip>
+            ) : (
+              <span className="text-gray-400">--</span>
+            )}
             <CopyComponent text={hash} />
             <a
               href={getBlockchainExplorerUrl(hash)}
