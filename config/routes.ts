@@ -134,7 +134,7 @@ export default [
   },
   {
     path: '/',
-    redirect: '/list/kyc',
+    redirect: '/user-management',
   },
   {
     path: '*',
