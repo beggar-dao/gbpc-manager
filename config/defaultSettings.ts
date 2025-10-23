@@ -17,6 +17,9 @@ const Settings: ProLayoutProps & {
   colorWeak: false,
   title: "GBPC",
   pwa: true,
+  waterMarkProps: {
+    content: "",
+  },
   logo: null, //"https://thegbpc.com/images/logo.png",
   iconfontUrl: "",
   token: {

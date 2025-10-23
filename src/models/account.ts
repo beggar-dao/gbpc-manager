@@ -19,7 +19,6 @@ import { etherToWei } from '@/utils/index';
 export default function AccountModel() {
   const { setLoading } = useModel('global');
   const { address, status, chainId } = useAccount();
-  console.log(address, status, chainId);
 
   const { data: readContractsData, refetch: readContractsRefetch } =
     useReadContracts({
