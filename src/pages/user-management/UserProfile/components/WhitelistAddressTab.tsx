@@ -1,6 +1,6 @@
 import { DeleteOutlined } from '@ant-design/icons';
 import { useRequest } from '@umijs/max';
-import { Button, message, Table, Tag } from 'antd';
+import { Button, message, Popconfirm, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import CopyComponent from '@/components/CopyComponent';
@@ -80,12 +80,16 @@ export default function WhitelistAddressTab({ userId }: Props) {
       title: 'Actions',
       key: 'actions',
       render: (_, record) => (
-        <Button
-          danger
-          variant="solid"
-          icon={<DeleteOutlined />}
-          onClick={() => handleRemoveAddress(record.id)}
-        />
+        <Popconfirm
+          title="Delete whitelisted address"
+          description="Are you sure you want to remove this address from the whitelist?"
+          onConfirm={() => handleRemoveAddress(record.id)}
+          okText="Yes, remove it"
+          cancelText="No, keep it"
+          okButtonProps={{ danger: true }}
+        >
+          <Button icon={<DeleteOutlined />} />
+        </Popconfirm>
       ),
     },
   ];
