@@ -203,7 +203,7 @@ export default function AccountInfoTab({
               rules={[{ type: 'email', message: 'Please enter valid email' }]}
             >
               {isEditingAccount ? (
-                <Input placeholder="Enter email address" />
+                <Input disabled placeholder="Enter email address" />
               ) : (
                 <div className="text-base text-[#202B4B] py-1">
                   {userProfile?.email}
