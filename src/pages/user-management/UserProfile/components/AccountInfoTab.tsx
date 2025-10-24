@@ -2,8 +2,7 @@ import { useRequest } from '@umijs/max';
 import { Button, Form, Input, message, Select } from 'antd';
 import { Country } from 'country-state-city';
 import { useState } from 'react';
-import { getRoles } from '@/services/role';
-import type { Role, RoleResponse } from '@/services/types/role';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import {
   AccountStatus,
   TwoFactorStatus,
@@ -13,12 +12,16 @@ import { updateUserProfile } from '@/services/user-profile';
 import { ChangePasswordModal } from './modals';
 
 interface Props {
-  userProfile: UserProfile;
   userId: string;
+  userProfile?: UserProfile;
   refresh?: () => Promise<unknown>;
 }
 
-export default function AccountInfoTab({ userProfile, refresh }: Props) {
+export default function AccountInfoTab({
+  userProfile,
+  userId,
+  refresh,
+}: Props) {
   const [form] = Form.useForm();
   const [securityForm] = Form.useForm();
   const [isEditingAccount, setIsEditingAccount] = useState(false);
@@ -26,15 +29,8 @@ export default function AccountInfoTab({ userProfile, refresh }: Props) {
   const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
   const [updateSecurityLoading, setUpdateSecurityLoading] = useState(false);
 
-  // Fetch roles from API
-  const { data: roles, loading: rolesLoading } = useRequest<RoleResponse>(
-    () => getRoles(),
-    {
-      onError: (error) => {
-        console.error('Failed to fetch roles:', error);
-      },
-    },
-  );
+  // Get roles and role utilities
+  const { roleOptions } = useUserRoles();
 
   // Get all countries
   const countries = Country.getAllCountries().map((country) => ({
@@ -50,14 +46,6 @@ export default function AccountInfoTab({ userProfile, refresh }: Props) {
     { label: 'Deactivated', value: AccountStatus.Deactivated },
   ];
 
-  // User Role Options - dynamically generated from API
-  const userRoleOptions = roles?.list
-    ? roles.list.map((role: Role) => ({
-        label: role.name || '',
-        value: role.id!,
-      }))
-    : [];
-
   // 2FA Options
   const twoFactorOptions = [
     { label: 'Enabled', value: TwoFactorStatus.Enabled },
@@ -66,7 +54,7 @@ export default function AccountInfoTab({ userProfile, refresh }: Props) {
 
   // Update account info mutation
   const { run: updateAccount, loading: updateAccountLoading } = useRequest(
-    (values) => updateUserProfile({ ...values, id: userProfile.id }),
+    (values) => updateUserProfile({ ...values, id: userId }),
     {
       manual: true,
       onSuccess: () => {
@@ -83,12 +71,12 @@ export default function AccountInfoTab({ userProfile, refresh }: Props) {
 
   const handleEditAccount = () => {
     form.setFieldsValue({
-      firstname: userProfile.firstname,
-      lastname: userProfile.lastname,
-      country: userProfile.country,
-      status: userProfile.status,
-      roleId: userProfile.roleId,
-      email: userProfile.email,
+      firstname: userProfile?.firstname,
+      lastname: userProfile?.lastname,
+      country: userProfile?.country,
+      status: userProfile?.status,
+      roleId: userProfile?.roleId,
+      email: userProfile?.email,
     });
     setIsEditingAccount(true);
   };
@@ -109,7 +97,7 @@ export default function AccountInfoTab({ userProfile, refresh }: Props) {
 
   const handleEditSecurity = () => {
     securityForm.setFieldsValue({
-      is2FA: userProfile.is2FA
+      is2FA: userProfile?.is2FA
         ? TwoFactorStatus.Enabled
         : TwoFactorStatus.Disabled,
     });
@@ -126,7 +114,7 @@ export default function AccountInfoTab({ userProfile, refresh }: Props) {
       const values = await securityForm.validateFields();
       setUpdateSecurityLoading(true);
       await updateUserProfile({
-        id: userProfile.id,
+        id: userId,
         is2FA: values.is2FA,
       });
       message.success('Security settings updated successfully');
@@ -160,7 +148,7 @@ export default function AccountInfoTab({ userProfile, refresh }: Props) {
                 <Input placeholder="Enter first name" />
               ) : (
                 <div className="text-base text-[#202B4B] py-1">
-                  {userProfile.firstname}
+                  {userProfile?.firstname}
                 </div>
               )}
             </Form.Item>
@@ -170,7 +158,7 @@ export default function AccountInfoTab({ userProfile, refresh }: Props) {
                 <Input placeholder="Enter last name" />
               ) : (
                 <div className="text-base text-[#202B4B] py-1">
-                  {userProfile.lastname}
+                  {userProfile?.lastname}
                 </div>
               )}
             </Form.Item>
@@ -189,7 +177,7 @@ export default function AccountInfoTab({ userProfile, refresh }: Props) {
                 />
               ) : (
                 <div className="text-base text-[#202B4B] py-1">
-                  {userProfile.country || '-'}
+                  {userProfile?.country || '-'}
                 </div>
               )}
             </Form.Item>
@@ -203,7 +191,7 @@ export default function AccountInfoTab({ userProfile, refresh }: Props) {
               ) : (
                 <div className="text-base text-[#202B4B] py-1">
                   {accountStatusOptions.find(
-                    (opt) => opt.value === userProfile.status,
+                    (opt) => opt.value === userProfile?.status,
                   )?.label || 'Active'}
                 </div>
               )}
@@ -218,23 +206,19 @@ export default function AccountInfoTab({ userProfile, refresh }: Props) {
                 <Input placeholder="Enter email address" />
               ) : (
                 <div className="text-base text-[#202B4B] py-1">
-                  {userProfile.email}
+                  {userProfile?.email}
                 </div>
               )}
             </Form.Item>
 
             <Form.Item label="User Role" name="roleId">
               {isEditingAccount ? (
-                <Select
-                  placeholder="Select user role"
-                  options={userRoleOptions}
-                  loading={rolesLoading}
-                />
+                <Select placeholder="Select user role" options={roleOptions} />
               ) : (
                 <div className="text-base text-[#202B4B] py-1">
-                  {userRoleOptions.find(
+                  {roleOptions.find(
                     (opt: { label: string; value: number }) =>
-                      opt.value === userProfile.roleId,
+                      opt.value === userProfile?.roleId,
                   )?.label || '-'}
                 </div>
               )}
@@ -277,7 +261,7 @@ export default function AccountInfoTab({ userProfile, refresh }: Props) {
                 />
               ) : (
                 <div className="text-base text-[#202B4B] py-1">
-                  {userProfile.is2FA ? 'Enabled' : 'Disabled'}
+                  {userProfile?.is2FA ? 'Enabled' : 'Disabled'}
                 </div>
               )}
             </Form.Item>
@@ -324,8 +308,8 @@ export default function AccountInfoTab({ userProfile, refresh }: Props) {
 
       {/* Change Password Modal */}
       <ChangePasswordModal
+        userId={userId}
         visible={isPasswordModalVisible}
-        userId={userProfile.id}
         onClose={() => setIsPasswordModalVisible(false)}
       />
     </div>

@@ -13,14 +13,15 @@ import type {
   TerminateSessionRequest,
   ChangePasswordRequest,
 } from './types/user-profile';
+import { ApiResponse } from './types/common';
 
 /**
  * Get user profile by ID
  * @param userId - User ID
  * @returns Promise<UserProfile>
  */
-export function getUserProfile(userId: string): Promise<UserProfile> {
-  return request<UserProfile>(`/user/${userId}`, {
+export function getUserProfile(userId: string): Promise<ApiResponse<UserProfile>> {
+  return request<ApiResponse<UserProfile>>(`/user/${userId}`, {
     method: 'GET',
   });
 }

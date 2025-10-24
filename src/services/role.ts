@@ -5,13 +5,14 @@
 
 import { request } from '@umijs/max';
 import type { RoleResponse } from './types/role';
+import { ApiResponse } from './types/common';
 
 /**
  * Get all roles
  * @returns Promise<RoleResponse[]>
  */
-export function getRoles(): Promise<RoleResponse[]> {
-  return request<RoleResponse[]>('/permission/role', {
+export function getRoles(): Promise<ApiResponse<RoleResponse>> {
+  return request<ApiResponse<RoleResponse>>('/permission/role', {
     method: 'GET',
   });
 }
