@@ -38,8 +38,6 @@ export default function UserProfile() {
   });
   const { getRoleById } = useUserRoles();
 
-  console.log('userProfile', userProfile, loading);
-
   return (
     <PageContainer header={{ title: '' }}>
       {/* Back Button */}
