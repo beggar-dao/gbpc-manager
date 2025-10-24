@@ -1,11 +1,11 @@
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import { history, useParams, useRequest } from '@umijs/max';
-import { Button, Spin, Tabs, Tag } from 'antd';
+import { Button, Skeleton, Tabs, Tag } from 'antd';
 import dayjs from 'dayjs';
 import { useState } from 'react';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import type { KYCStatus } from '@/services/types/user-management';
-import type { UserProfile as UserProfileType } from '@/services/types/user-profile';
 import { getUserProfile } from '@/services/user-profile';
 import {
   getKYCStatusClass,
@@ -29,30 +29,16 @@ export default function UserProfile() {
     data: userProfile,
     loading,
     refresh,
-  } = useRequest<UserProfileType>(() => getUserProfile(userId!), {
+  } = useRequest(() => getUserProfile(userId!), {
     ready: !!userId,
+    formatResult: (response) => {
+      console.log('response', response);
+      return response.data;
+    },
   });
+  const { getRoleById } = useUserRoles();
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Spin size="large" />
-      </div>
-    );
-  }
-
-  if (!userProfile) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2">User not found</h2>
-          <Button onClick={() => history.push('/user-management/user-list')}>
-            Back to User List
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  console.log('userProfile', userProfile, loading);
 
   return (
     <PageContainer header={{ title: '' }}>
@@ -68,93 +54,97 @@ export default function UserProfile() {
 
       {/* Header Card */}
       <div className="bg-white rounded-lg p-6 mb-6 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold text-[#202B4B]">
-            {userProfile.id} Profile
-          </h1>
-        </div>
-
-        {/* User Info Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div>
-            <div className="text-sm text-[#8C8C8C] mb-1">UID</div>
-            <div className="text-base font-medium text-[#202B4B]">
-              {userProfile.id}
-            </div>
+        <Skeleton loading={loading}>
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl font-bold text-[#202B4B]">
+              {userProfile?.id || ''} Profile
+            </h1>
           </div>
 
-          <div>
-            <div className="text-sm text-[#8C8C8C] mb-1">Full Name</div>
-            <div className="text-base font-medium text-[#202B4B]">
-              {userProfile.firstname} {userProfile.lastname}
-            </div>
-          </div>
-
-          <div>
-            <div className="text-sm text-[#8C8C8C] mb-1">Country</div>
-            <div className="text-base font-medium text-[#202B4B]">
-              {userProfile.country || '-'}
-            </div>
-          </div>
-
-          <div>
-            <div className="text-sm text-[#8C8C8C] mb-1">Email</div>
-            <div className="text-base font-medium text-[#202B4B]">
-              {userProfile.email}
-            </div>
-          </div>
-
-          <div>
-            <div className="text-sm text-[#8C8C8C] mb-1">Role</div>
-            <div className="text-base font-medium text-[#202B4B]">
-              {userProfile.userRole
-                ? userProfile.userRole
-                    .replace(/_/g, ' ')
-                    .replace(/\b\w/g, (l: string) => l.toUpperCase())
-                : 'User'}
-            </div>
-          </div>
-
-          <div>
-            <div className="text-sm text-[#8C8C8C] mb-1">Email Status</div>
-            <Tag color="green">Verified</Tag>
-          </div>
-
-          <div>
-            <div className="text-sm text-[#8C8C8C] mb-1">
-              Joined Date & Time
-            </div>
-            <div className="text-base font-medium text-[#202B4B]">
-              {dayjs(userProfile.createTime).format('DD/MM/YYYY HH:mm:ss')}
-            </div>
-          </div>
-
-          <div>
-            <div className="text-sm text-[#8C8C8C] mb-1">KYC Status</div>
-            {userProfile.kycStatus !== null &&
-            userProfile.kycStatus !== undefined ? (
-              <Tag
-                color={getKYCStatusClass(userProfile.kycStatus as KYCStatus)}
-              >
-                {getKYCStatusText(userProfile.kycStatus as KYCStatus)}
-              </Tag>
-            ) : (
-              <span className="text-[#8C8C8C]">-</span>
-            )}
-          </div>
-
-          <div>
-            <div className="text-sm text-[#8C8C8C] mb-1">Last Login / IP</div>
-            <div className="text-base font-medium text-[#202B4B]">
-              {userProfile.lastLoginIp || '-'}
-            </div>
-            {userProfile.lastLoginTime && (
-              <div className="text-sm text-[#8C8C8C]">
-                {dayjs(userProfile.lastLoginTime).format('MMM D, YYYY - HH:mm')}
+          {/* User Info Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div>
+              <div className="text-sm text-[#8C8C8C] mb-1">UID</div>
+              <div className="text-base font-medium text-[#202B4B]">
+                {userProfile?.id}
               </div>
-            )}
+            </div>
+
+            <div>
+              <div className="text-sm text-[#8C8C8C] mb-1">Full Name</div>
+              <div className="text-base font-medium text-[#202B4B]">
+                {userProfile?.firstname} {userProfile?.lastname}
+              </div>
+            </div>
+
+            <div>
+              <div className="text-sm text-[#8C8C8C] mb-1">Country</div>
+              <div className="text-base font-medium text-[#202B4B]">
+                {userProfile?.country || '-'}
+              </div>
+            </div>
+
+            <div>
+              <div className="text-sm text-[#8C8C8C] mb-1">Email</div>
+              <div className="text-base font-medium text-[#202B4B]">
+                {userProfile?.email || '-'}
+              </div>
+            </div>
+
+            <div>
+              <div className="text-sm text-[#8C8C8C] mb-1">Role</div>
+              <div className="text-base font-medium text-[#202B4B]">
+                {userProfile?.roleId
+                  ? getRoleById(userProfile.roleId)?.name
+                  : '-'}
+              </div>
+            </div>
+
+            <div>
+              <div className="text-sm text-[#8C8C8C] mb-1">Email Status</div>
+              <Tag color="green">Verified</Tag>
+            </div>
+
+            <div>
+              <div className="text-sm text-[#8C8C8C] mb-1">
+                Joined Date & Time
+              </div>
+              <div className="text-base font-medium text-[#202B4B]">
+                {userProfile
+                  ? dayjs(userProfile.createTime).format('DD/MM/YYYY HH:mm:ss')
+                  : '-'}
+              </div>
+            </div>
+
+            <div>
+              <div className="text-sm text-[#8C8C8C] mb-1">KYC Status</div>
+              {userProfile?.kycStatus !== null &&
+              userProfile?.kycStatus !== undefined ? (
+                <Tag
+                  color={getKYCStatusClass(userProfile.kycStatus as KYCStatus)}
+                >
+                  {getKYCStatusText(userProfile.kycStatus as KYCStatus)}
+                </Tag>
+              ) : (
+                <span className="text-[#8C8C8C]">-</span>
+              )}
+            </div>
+
+            <div>
+              <div className="text-sm text-[#8C8C8C] mb-1">Last Login / IP</div>
+              <div className="text-base font-medium text-[#202B4B]">{'-'}</div>
+              {userProfile?.updateTime && (
+                <div className="text-sm text-[#8C8C8C]">
+                  {userProfile
+                    ? dayjs(userProfile.updateTime).format(
+                        'DD/MM/YYYY HH:mm:ss',
+                      )
+                    : '-'}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        </Skeleton>
       </div>
 
       {/* Main Tabs Section */}
@@ -169,7 +159,7 @@ export default function UserProfile() {
               label: 'Account Info',
               children: (
                 <AccountInfoMainTab
-                  userProfile={userProfile as UserProfileType}
+                  userProfile={userProfile}
                   userId={userId!}
                   refresh={refresh}
                 />

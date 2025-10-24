@@ -4,12 +4,16 @@ import AccountInfoTab from './AccountInfoTab';
 import LoginHistoryTab from './LoginHistoryTab';
 
 interface Props {
-  userProfile: UserProfile;
   userId: string;
+  userProfile?: UserProfile;
   refresh?: () => Promise<unknown>;
 }
 
-export default function AccountInfoMainTab({ userProfile, userId, refresh }: Props) {
+export default function AccountInfoMainTab({
+  userProfile,
+  userId,
+  refresh,
+}: Props) {
   const [activeSubTab, setActiveSubTab] = useState<string | number>(
     'account-details',
   );
@@ -29,7 +33,11 @@ export default function AccountInfoMainTab({ userProfile, userId, refresh }: Pro
 
       <div>
         {activeSubTab === 'account-details' && (
-          <AccountInfoTab userProfile={userProfile} userId={userId} refresh={refresh} />
+          <AccountInfoTab
+            userProfile={userProfile}
+            userId={userId}
+            refresh={refresh}
+          />
         )}
         {activeSubTab === 'login-history' && (
           <LoginHistoryTab userId={userId} />
