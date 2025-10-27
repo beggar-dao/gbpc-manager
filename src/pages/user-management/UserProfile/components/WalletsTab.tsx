@@ -44,7 +44,7 @@ export default function WalletsTab({ userId }: Props) {
   } = useRequest(
     async () => {
       const response = await getAccountAssetList({
-        userId: Number(userId),
+        userId,
         pageNumber: 1,
         pageSize: 100,
       });

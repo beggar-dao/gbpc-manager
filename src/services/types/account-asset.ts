@@ -13,7 +13,7 @@ export interface AccountAssetParams {
   /**
    * 用户 ID
    */
-  userId?: number;
+  userId?: string;
 }
 
 /**
