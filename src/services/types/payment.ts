@@ -22,7 +22,7 @@ export interface PaymentBankListParams {
   /**
    * 用户 ID
    */
-  userId?: number;
+  userId?: string;
 }
 
 /**

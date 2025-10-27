@@ -28,7 +28,7 @@ export default function PaymentMethodsTab({ userId }: Props) {
 
   // Fetch payment methods from API
   const { data, loading, refresh } = useRequest(
-    () => getPaymentBankList({ userId: Number(userId) }),
+    () => getPaymentBankList({ userId }),
     {
       refreshDeps: [userId],
     },
