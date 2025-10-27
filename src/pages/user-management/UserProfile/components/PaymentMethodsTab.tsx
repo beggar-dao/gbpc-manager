@@ -38,9 +38,9 @@ export default function PaymentMethodsTab({ userId }: Props) {
 
   const handleDelete = (record: WalletPaymentBankItem) => {
     modal.confirm({
-      title: 'Delete Payment Method',
+      title: 'Confirm Delete Bank Account',
       icon: <ExclamationCircleOutlined />,
-      content: `Are you sure you want to delete this payment method for ${record.holderName}?`,
+      content: `Are you sure you want to delete this bank account? This action cannot be undone.`,
       okText: 'Delete',
       okButtonProps: { danger: true },
       cancelText: 'Cancel',
@@ -49,11 +49,11 @@ export default function PaymentMethodsTab({ userId }: Props) {
           setDeletingId(record.id!);
           await deletePaymentBank(record.id!);
 
-          message.success('Payment method deleted successfully');
+          message.success('Bank account deleted successfully');
           // Refresh the list
           refresh();
         } catch (error) {
-          message.error('Failed to delete payment method');
+          message.error('Failed to delete bank account');
           console.error(error);
         } finally {
           setDeletingId(null);
