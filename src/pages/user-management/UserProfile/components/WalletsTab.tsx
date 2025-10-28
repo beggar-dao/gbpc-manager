@@ -42,27 +42,12 @@ export default function WalletsTab({ userId }: Props) {
     loading: fetchLoading,
     refresh,
   } = useRequest(
-    async () => {
-      const response = await getAccountAssetList({
+    () =>
+      getAccountAssetList({
         userId,
         pageNumber: 1,
         pageSize: 100,
-      });
-
-      const walletData: Wallet[] = (response.list || []).map(
-        (item: AccountAssetItem) => ({
-          id: item.id || '',
-          address: item.address || '',
-          chainId: item.chainId || '',
-          currency: item.currency || '',
-          balance: item.balance || '0',
-          freezeBalance: item.freezeBalance || '0',
-          status: 1, // Default to Active, adjust based on your API response
-        }),
-      );
-
-      return walletData;
-    },
+      }),
     {
       ready: !!userId,
       refreshDeps: [userId],
@@ -73,7 +58,7 @@ export default function WalletsTab({ userId }: Props) {
     },
   );
 
-  const wallets = (data as Wallet[] | undefined) ?? [];
+  const wallets = (data?.list as Wallet[] | undefined) ?? [];
 
   const handleFreezeWallet = (wallet: Wallet) => {
     const isFrozen = wallet.status === 2;
