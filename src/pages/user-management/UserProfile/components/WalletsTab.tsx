@@ -13,11 +13,11 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import { useState } from 'react';
 import CopyComponent from '@/components/CopyComponent';
-import type { AccountAssetItem } from '@/services/types/account-asset';
 import {
   getAccountAssetList,
   updateAccountAssetStatus,
 } from '@/services/wallet/account-asset';
+import { getChainName, getCurrencyName } from '@/utils/chain';
 
 interface Props {
   userId: string;
@@ -116,13 +116,17 @@ export default function WalletsTab({ userId }: Props) {
       title: 'Chain',
       dataIndex: 'chainId',
       key: 'chainId',
-      render: (chainId: string) => <Tag color="blue">{chainId}</Tag>,
+      render: (chainId: string) => (
+        <Tag color="blue">{getChainName(Number(chainId))}</Tag>
+      ),
     },
     {
       title: 'Currency',
       dataIndex: 'currency',
       key: 'currency',
-      render: (text) => <span className="font-medium">{text}</span>,
+      render: (text) => (
+        <span className="font-medium">{getCurrencyName(Number(text))}</span>
+      ),
     },
     {
       title: 'Balance',
@@ -135,7 +139,7 @@ export default function WalletsTab({ userId }: Props) {
             minimumFractionDigits: 2,
             maximumFractionDigits: 6,
           })}{' '}
-          {record.currency}
+          {getCurrencyName(Number(record.currency))}
         </span>
       ),
     },
