@@ -80,14 +80,8 @@ export default function FiatWithdrawals({ userId }: Props) {
       dataIndex: 'fee',
       key: 'fee',
       align: 'right',
-      render: (fee: string, record) => (
-        <span className="text-sm text-orange-600">
-          {parseFloat(fee).toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}{' '}
-          {record.fiatCurrency}
-        </span>
+      render: (fee: string) => (
+        <span className="text-sm text-orange-600">{fee}</span>
       ),
     },
     {

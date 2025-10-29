@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import CopyComponent from '@/components/CopyComponent';
 import type { AccountTransactionItem } from '@/services/types/account';
 import { getAccountTransactionList } from '@/services/wallet/account';
+import { getChainName, getCurrencyName } from '@/utils/chain';
 
 interface Props {
   userId: string;
@@ -52,13 +53,17 @@ export default function CryptoDeposits({ userId }: Props) {
       title: 'Currency',
       dataIndex: 'currency',
       key: 'currency',
-      render: (text) => <span className="font-medium">{text}</span>,
+      render: (text) => (
+        <span className="font-medium">{getCurrencyName(Number(text))}</span>
+      ),
     },
     {
       title: 'Chain',
       dataIndex: 'chainId',
       key: 'chainId',
-      render: (chainId: string) => <Tag color="blue">{chainId}</Tag>,
+      render: (chainId: string) => (
+        <Tag color="blue">{getChainName(Number(chainId))}</Tag>
+      ),
     },
     {
       title: 'Wallet Address',
@@ -109,7 +114,7 @@ export default function CryptoDeposits({ userId }: Props) {
             minimumFractionDigits: 2,
             maximumFractionDigits: 8,
           })}{' '}
-          {record.currency}
+          {getCurrencyName(Number(record.currency))}
         </span>
       ),
     },
