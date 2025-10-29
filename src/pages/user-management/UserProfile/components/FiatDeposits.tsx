@@ -84,14 +84,8 @@ export default function FiatDeposits({ userId }: Props) {
       title: 'Fees',
       dataIndex: 'fee',
       key: 'fee',
-      render: (fee: string, record) => (
-        <span className="text-sm text-orange-600">
-          {parseFloat(fee).toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 6,
-          })}{' '}
-          {record.fiatCurrency}
-        </span>
+      render: (fee: string) => (
+        <span className="text-sm text-orange-600">{fee}</span>
       ),
     },
     {
